@@ -1,4 +1,13 @@
 import argparse
+from enum import Enum
+
+class SwitchState(Enum):
+	"""
+	Enum class to represent the state of the switch.
+	"""
+	PAYLOAD_ON = "ON"
+	PAYLOAD_OFF = "OFF"
+
 
 def parse_params() -> argparse.Namespace:
 	"""
@@ -38,7 +47,18 @@ def parse_params() -> argparse.Namespace:
 	return parsed
 
 def main():
+	"""
+	Main function of the script.
+	"""
+	# Parse the params
 	args = parse_params()
+
+	# Init switch state
+	switch_state = SwitchState.PAYLOAD_OFF
+
+	# Topics that the device will have
+	topic = f"redes2/2312/10/{args.id}"				# Get the state
+	command_topic = f"redes2/2312/10/{args.id}/set"	# Define state
 
 if __name__ == '__main__':
 	main()
