@@ -1,6 +1,11 @@
 import argparse
 
-def parse_params():
+def parse_params() -> argparse.Namespace:
+	"""
+	Parse the parameters of the script.
+	Returns:
+		argparse.Namespace: The parsed parameters.
+	"""
 	# Init the object
 	params = argparse.ArgumentParser(
 		description="IOT Switch"
@@ -34,7 +39,6 @@ def parse_params():
 
 def main():
 	args = parse_params()
-	print(args)
 
 if __name__ == '__main__':
 	main()
