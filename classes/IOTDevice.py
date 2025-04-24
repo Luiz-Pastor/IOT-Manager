@@ -1,6 +1,5 @@
 import paho.mqtt.client as mqtt
 from typing import Optional
-from time import sleep
 
 class IOTDevice:
 
@@ -21,7 +20,7 @@ class IOTDevice:
 		"""
 		# Save the connections params
 		self.host = host
-		self.password = password
+		self.port = port
 
 		# Save the device id
 		self.device_id = device_id
