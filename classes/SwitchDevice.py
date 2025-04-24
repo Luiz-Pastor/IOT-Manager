@@ -65,7 +65,7 @@ class SwitchDevice(IOTDevice):
 			self.status.value,
 		)
 
-	def on_message(self, client, userdata, msg):
+	def on_message(self, client, userdata, msg) -> None:
 		"""
 		Callback function that is called when a message is received.
 		Args:
