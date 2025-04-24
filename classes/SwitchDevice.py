@@ -13,13 +13,20 @@ class SwitchDevice(IOTDevice):
 	"""
 	Class that represents a switch device.
 	"""
-	def __init__(self, host, port, device_id, probability=0.3):
+	def __init__(
+		self,
+		host: str,
+		port: int,
+		device_id: str,
+		probability=0.3: float
+	):
 		"""
 		Constructor of the SwitchDevice class.
 		Args:
 			host (str): Host of the MQTT broker.
-			port (str): Port of the MQTT broker.
+			port (int): Port of the MQTT broker.
 			device_id (str): ID of the device.
+			probability (float): Probability of the switch failing.
 		"""
 		# Save the main device params
 		super().__init__(host, port, device_id)

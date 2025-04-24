@@ -6,20 +6,25 @@ class IOTDevice:
 
 	TOPIC_BASENAME = 'redes/2312/10'
 
-	def __init__(self, host, password, devide_id):
+	def __init__(
+		self,
+		host: str,
+		port: int,
+		device_id: str
+	):
 		"""
 		Constructor of the IOTDevice class.
 		Args:
 			host (str): Host of the MQTT broker.
-			password (str): Password of the MQTT broker.
-			devide_id (str): ID of the device.
+			port (int): Port of the MQTT broker.
+			device_id (str): ID of the device.
 		"""
 		# Save the connections params
 		self.host = host
 		self.password = password
 
 		# Save the device id
-		self.device_id = devide_id
+		self.device_id = device_id
 
 		# Save the topics that will be used
 		self.status_topic = f"{self.TOPIC_BASENAME}/{self.device_id}"
