@@ -110,6 +110,8 @@ class DummySwitchDevice(IOTDevice):
 		self.client.publish(
 			self.status_topic,
 			self.status.value,
+			qos=1,
+			retain=True,
 		)
 
 def parse_params() -> argparse.Namespace:
