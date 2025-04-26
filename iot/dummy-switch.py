@@ -68,6 +68,7 @@ class DummySwitchDevice(IOTDevice):
 		self.client.publish(
 			self.status_topic,
 			self.status.value,
+			retain=True,
 		)
 
 	def on_message(self, client, userdata, msg) -> None:

@@ -89,6 +89,7 @@ class DummyClockDevice(IOTDevice):
 			self.client.publish(
 				self.status_topic,
 				time_str,
+				retain=True
 			)
 
 			# Print the time

@@ -78,6 +78,7 @@ class DummySensorDevice(IOTDevice):
 			self.client.publish(
 				self.status_topic,
 				self.value,
+				retain=True,
 			)
 
 			# Update the value:
