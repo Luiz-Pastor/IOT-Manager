@@ -1,7 +1,8 @@
 import paho.mqtt.client as mqtt
-from typing import Optional
+from typing import Optional, Callable
+from abc import ABC, abstractmethod
 
-class IOTDevice:
+class IOTDevice(ABC):
 
 	TOPIC_BASENAME = 'redes/2312/10'
 
@@ -9,7 +10,9 @@ class IOTDevice:
 		self,
 		host: str,
 		port: int,
-		device_id: str
+		device_id: str,
+		on_connect: Callable,
+		on_message: Callable
 	):
 		"""
 		Constructor of the IOTDevice class.
@@ -32,6 +35,10 @@ class IOTDevice:
 		# Create the client
 		self.client = mqtt.Client(client_id=self.device_id)
 
+		# Set the callbacks
+		self.client.on_connect = on_connect
+		self.client.on_message = on_message
+
 	def run(self) -> Optional[str]:
 		"""
 		Connect with the broker and start the loop.
@@ -53,3 +60,26 @@ class IOTDevice:
 		except KeyboardInterrupt:
 			self.client.disconnect()
 		return None
+
+	@abstractmethod
+	def on_connect(self, client, userdata, flags, rc) -> None:
+		"""
+		Callback function that is called when the client connects to the broker.
+		Args:
+			client (mqtt.Client): The client instance for this callback.
+			userdata (any): The private user data as set in Client() or userdata_set().
+			flags (dict): Response flags sent by the broker.
+			rc (int): The connection result.
+		"""
+		pass
+
+	@abstractmethod
+	def on_message(self, client, userdata, msg) -> None:
+		"""
+		Callback function that is called when a message is received.
+		Args:
+			client (mqtt.Client): The client instance for this callback.
+			userdata (any): The private user data as set in Client() or userdata_set().
+			msg (mqtt.MQTTMessage): An instance of MQTTMessage.
+		"""
+		pass
