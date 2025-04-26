@@ -78,6 +78,7 @@ class DummySensorDevice(IOTDevice):
 			self.client.publish(
 				self.status_topic,
 				self.value,
+				qos=1,
 				retain=True,
 			)
 
