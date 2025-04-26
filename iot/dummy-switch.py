@@ -46,10 +46,6 @@ class DummySwitchDevice(IOTDevice):
 		# Set the switch init state
 		self.status = SwitchState.PAYLOAD_OFF
 
-		# Set the function
-		self.client.on_message = self.on_message
-		self.client.on_connect = self.on_connect
-
 		# Device header, for debugging
 		self.device_header = f"[Switch - {self.device_id}]"
 	
