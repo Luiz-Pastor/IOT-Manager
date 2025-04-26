@@ -32,7 +32,13 @@ class DummySwitchDevice(IOTDevice):
 			probability (float): Probability of the switch failing.
 		"""
 		# Save the main device params
-		super().__init__(host, port, device_id)
+		super().__init__(
+			host,
+			port,
+			device_id,
+			self.on_connect,
+			self.on_message
+		)
 
 		# Save the switch probability
 		self.probability = probability
