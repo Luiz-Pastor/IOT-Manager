@@ -21,7 +21,7 @@ class DummySwitchDevice(IOTDevice):
 		host: str,
 		port: int,
 		device_id: str,
-		probability=0.3: float
+		probability: float = 0.3
 	):
 		"""
 		Constructor of the DummySwitchDevice class.

@@ -43,7 +43,6 @@ class IOTDevice:
 			self.client.connect(
 				self.host,
 				self.port,
-				keep_alive=60
 			)
 		except Exception as e:
 			return str(e)
