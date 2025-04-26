@@ -54,7 +54,7 @@ class DummyClockDevice(IOTDevice):
 			).replace(hour=hours, minute=minutes, second=seconds)
 
 		# Device header, so it can be used in the debug prints
-		self.device_header = f"[Clock - {self.device_id}]"
+		self.device_header = f"[Dummy Clock - {self.device_id}]"
 
 	def on_connect(self, client, userdata, flags, rc) -> None:
 		"""

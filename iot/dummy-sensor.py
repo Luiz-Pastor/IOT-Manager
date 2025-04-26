@@ -48,7 +48,7 @@ class DummySensorDevice(IOTDevice):
 		self.value = min_value
 
 		# Set the sensor header, so it can be used in the debug prints
-		self.device_header = f"[Sensor - {self.device_id}]"
+		self.device_header = f"[Dummy Sensor - {self.device_id}]"
 
 	def on_connect(self, client, userdata, flags, rc) -> None:
 		"""
@@ -146,7 +146,6 @@ def parse_params() -> argparse.Namespace:
 	# Added constraints
 	if parsed.min > parsed.max:
 		params.error("The min value must be less than the max value")
-		sys.exit(1)
 
 	# Return the params
 	return parsed

@@ -47,7 +47,7 @@ class DummySwitchDevice(IOTDevice):
 		self.status = SwitchState.PAYLOAD_OFF
 
 		# Device header, for debugging
-		self.device_header = f"[Switch - {self.device_id}]"
+		self.device_header = f"[Dummy witch - {self.device_id}]"
 	
 	def on_connect(self, client, userdata, flags, rc) -> None:
 		"""
