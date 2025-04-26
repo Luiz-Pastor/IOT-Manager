@@ -1,5 +1,6 @@
 mosquitto:
-	@docker run -it \
+	@docker run -it --rm \
+		--name mosquitto \
 		-p 1883:1883 \
 		-v ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro \
 		eclipse-mosquitto
