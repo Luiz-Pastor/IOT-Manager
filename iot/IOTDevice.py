@@ -83,3 +83,10 @@ class IOTDevice(ABC):
 			msg (mqtt.MQTTMessage): An instance of MQTTMessage.
 		"""
 		pass
+
+	@abstractmethod
+	def publish_status(self) -> None:
+		"""
+		Publish the current status of the device.
+		"""
+		pass
