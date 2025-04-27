@@ -82,6 +82,8 @@ class DummySwitchDevice(IOTDevice):
 		print(f"{self.device_header} Connected with result code {rc}")
 
 		# Subscribe to the command topic
+		print(f"{self.device_header} Init state: {self.status.value}")
+		print(f"{self.device_header} Subscribing to {self.command_topic}", end="\n\n")
 		self.client.subscribe(self.command_topic)
 
 		# Publish the current state
