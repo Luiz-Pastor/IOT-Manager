@@ -2,6 +2,7 @@ import argparse
 import sys
 import random
 from enum import Enum
+import json
 
 from .IOTDevice import IOTDevice
 
@@ -9,8 +10,8 @@ class SwitchState(Enum):
 	"""
 	Enum class to represent the state of the switch.
 	"""
-	PAYLOAD_ON = "ON"
-	PAYLOAD_OFF = "OFF"
+	SWITCH_ON = "ON"
+	SWITCH_OFF = "OFF"
 
 class DummySwitchDevice(IOTDevice):
 	"""
@@ -44,11 +45,30 @@ class DummySwitchDevice(IOTDevice):
 		self.probability = probability
 
 		# Set the switch init state
-		self.status = SwitchState.PAYLOAD_OFF
+		self.status = SwitchState.SWITCH_OFF
 
 		# Device header, for debugging
 		self.device_header = f"[Dummy witch - {self.device_id}]"
 	
+		# Possible commands
+		self.commands = {
+			'get': self.get_command,
+			'set': self.set_command,
+		}
+
+	def publish_status(self) -> None:
+		"""
+		Publish the current status of the device.
+		"""
+		self.client.publish(
+			self.status_topic,
+			json.dumps({
+				"state": self.status.value,
+			}),
+			qos=1,
+			retain=True,
+		)
+
 	def on_connect(self, client, userdata, flags, rc) -> None:
 		"""
 		Callback function that is called when the client connects to the broker.
@@ -65,12 +85,7 @@ class DummySwitchDevice(IOTDevice):
 		self.client.subscribe(self.command_topic)
 
 		# Publish the current state
-		self.client.publish(
-			self.status_topic,
-			self.status.value,
-			qos=1,
-			retain=True,
-		)
+		self.publish_status()
 
 	def on_message(self, client, userdata, msg) -> None:
 		"""
@@ -83,14 +98,55 @@ class DummySwitchDevice(IOTDevice):
 				be decoded by using the decode() method.
 		"""
 		# Get the message payload
-		payload = msg.payload.decode().strip().upper()
-		print(f"{self.device_header} Received message: {payload}")
+		print(f"{self.device_header} Received message: {msg.payload.decode()}")
+		try:
+			payload = json.loads(msg.payload)
+		except json.JSONDecodeError:
+			print(f"{self.device_header} Bad message format")
+			return
+
+		# Check if a command has been received
+		if 'cmd' not in payload:
+			print(f"{self.device_header} Invalid message received, ignoring")
+			return
+
+		# Execute the command
+		current_command = self.commands.get(payload['cmd'])
+		if current_command:
+			current_command(client, userdata, payload)
+			return
+
+		# Comamnd not valid
+		print(f"{self.device_header} Invalid command received, ignoring")
+
+	def get_command(self, client, userdata, payload) -> None:
+		"""
+		Callback function that is called when a message is received.
+		Args:
+			client (mqtt.Client): The client instance for this callback.
+			userdata (any): The private user data as set in Client() or userdata_set().
+			payload (json): The payload of the message, as JSON
+		"""
+		print(f"{self.device_header} Status is {self.status.value}")
+		self.publish_status()
+		
+	def set_command(self, client, userdata, payload) -> None:
+		"""
+		Callback function that is called when a message is received.
+		Args:
+			client (mqtt.Client): The client instance for this callback.
+			userdata (any): The private user data as set in Client() or userdata_set().
+			payload (json): The payload of the message, as JSON
+		"""
+		if 'state' not in payload:
+			print(f"{self.device_header} Error: no state received")
+			return
 
 		# Get the status from the enum
 		try:
-			received_status = SwitchState(payload)
+			received_status = SwitchState(payload['state'])
 		except ValueError:
-			print(f"{self.device_header} Invalid status received, ignoring")
+			print(f"{self.device_header} Invalid state received, ignoring")
 			received_status = None
 		
 		# If the status is valid, try to change it
@@ -98,21 +154,16 @@ class DummySwitchDevice(IOTDevice):
 			random_number = random.randint(0, 100) / 100
 
 			# Simulate a failure
-			if random_number < self.probability:
-				print(f"{self.device_header} Simulating a failure")
-			elif received_status == self.status:
+			if received_status == self.status:
 				print(f"{self.device_header} Status is already {self.status.value}")
+			elif random_number < self.probability:
+				print(f"{self.device_header} Simulating a failure")
 			else:
 				print(f"{self.device_header} Changing status from {self.status.value} to {received_status.value}")
 				self.status = received_status
 		
 		# Publish the current state
-		self.client.publish(
-			self.status_topic,
-			self.status.value,
-			qos=1,
-			retain=True,
-		)
+		self.publish_status()
 
 def parse_params() -> argparse.Namespace:
 	"""
