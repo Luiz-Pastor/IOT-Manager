@@ -4,6 +4,7 @@ from typing import Optional
 from datetime import datetime, timedelta
 import threading
 import time
+import json
 
 from .IOTDevice import IOTDevice
 
@@ -56,6 +57,28 @@ class DummyClockDevice(IOTDevice):
 		# Device header, so it can be used in the debug prints
 		self.device_header = f"[Dummy Clock - {self.device_id}]"
 
+		# Possible commands
+		self.commands = {
+			'get': self.get_command,
+		}
+
+	
+	def publish_status(self):
+		"""
+		Publish the status of the sensor.
+		"""
+		# Publish the state
+		time_str = self.current_time.strftime("%H:%M:%S")
+		print(f"{self.device_header} Publishing state: {time_str}")
+		self.client.publish(
+			self.status_topic,
+			json.dumps({
+				"state": time_str,
+			}),
+			qos=1,
+			retain=True
+		)
+
 	def on_connect(self, client, userdata, flags, rc) -> None:
 		"""
 		Callback function that is called when the client connects to the broker.
@@ -67,6 +90,14 @@ class DummyClockDevice(IOTDevice):
 		"""
 		# Debug that the connection has been established
 		print(f"{self.device_header} Connected with result code {rc}")
+
+		# Subscribe to the command topic
+		print(f"{self.device_header} Init state: {self.current_time.strftime('%H:%M:%S')}")
+		print(f"{self.device_header} Subscribing to {self.command_topic}", end="\n\n")
+		self.client.subscribe(self.command_topic)
+
+		# Publish the init state
+		self.publish_status()
 
 		# Create a thread that will be publishing the state
 		thread = threading.Thread(
@@ -84,23 +115,14 @@ class DummyClockDevice(IOTDevice):
 
 		# Loop where the info is sent
 		while True:
-			# Publish the state
-			time_str = self.current_time.strftime("%H:%M:%S")
-			self.client.publish(
-				self.status_topic,
-				time_str,
-				qos=1,
-				retain=True
-			)
-
-			# Print the time
-			print(f"{self.device_header} Sending time: {time_str}")
+			# Sleep the calculated time
+			time.sleep(time_to_wait)
 
 			# Update the time
 			self.current_time += timedelta(seconds=self.increment)
 
-			# Sleep the calculated time
-			time.sleep(time_to_wait)
+			# Publish the state
+			self.publish_status()
 
 	def on_message(self, client, userdata, msg) -> None:
 		"""
@@ -110,7 +132,37 @@ class DummyClockDevice(IOTDevice):
 			userdata: The private user data as set in Client() or userdata_set.
 			msg (mqtt.MQTTMessage): An instance of MQTTMessage.
 		"""
-		pass
+		print(f"{self.device_header} Received message: {str(msg.payload.decode())}")
+		try:
+			payload = json.loads(msg.payload)
+		except json.JSONDecodeError:
+			print(f"{self.device_header} Bad message format")
+			return
+
+		# Check if a command has been received
+		if 'cmd' not in payload:
+			print(f"{self.device_header} Invalid message received, ignoring")
+			return
+
+		# Execute the command
+		current_command = self.commands.get(payload['cmd'])
+		if current_command:
+			current_command(client, userdata, payload)
+			return
+
+		# Comamnd not valid
+		print(f"{self.device_header} Invalid command received, ignoring")
+
+	def get_command(self, client, userdata, payload: str) -> None:
+		"""
+		Command that is executed when a message is received.
+		Args:
+			client (mqtt.Client): The client instance for this callback.
+			userdata: The private user data as set in Client() or userdata_set in subscribe().
+			payload (Any): The payload of the message.
+		"""
+		print(f"{self.device_header} Status is {self.current_time.strftime('%H:%M:%S')}")
+		self.publish_status()
 
 
 def parse_params() -> argparse.Namespace:
