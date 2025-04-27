@@ -2,6 +2,7 @@ import argparse
 import sys
 import threading
 import time
+import json
 
 from .IOTDevice import IOTDevice
 
@@ -50,6 +51,26 @@ class DummySensorDevice(IOTDevice):
 		# Set the sensor header, so it can be used in the debug prints
 		self.device_header = f"[Dummy Sensor - {self.device_id}]"
 
+		# Possible commands
+		self.commands = {
+			'get': self.get_command,
+		}
+
+	def publish_status(self):
+		"""
+		Publish the status of the sensor.
+		"""
+		# Publish the state
+		print(f"{self.device_header} Publishing state: {self.value}")
+		self.client.publish(
+			self.status_topic,
+			json.dumps({
+				"state": self.value,
+			}),
+			qos=1,
+			retain=True,
+		)
+
 	def on_connect(self, client, userdata, flags, rc) -> None:
 		"""
 		Callback function that is called when the client connects to the broker.
@@ -59,28 +80,31 @@ class DummySensorDevice(IOTDevice):
 			flags (dict): Response flags sent by the broker.
 			rc (int): The connection result.
 		"""
-		# Create a thread that will be publishing the state
+		# Debug print
 		print(f"{self.device_header} Connected with result code {rc}")
+		
+		# Subscribe to the command topic
+		print(f"{self.device_header} Init state: {self.value}")
+		print(f"{self.device_header} Subscribing to {self.command_topic}", end="\n\n")
+		self.client.subscribe(self.command_topic)
+
+		# Publish the init state
+		self.publish_status()
+
+		# Create a thread that will be publishing the state
 		thead = threading.Thread(
-			target=self.publish_state_loop,
+			target=self.device_loop,
 			daemon=True
 		)
 		thead.start()
-	
 
-	def publish_state_loop(self):
+	def device_loop(self):
 		"""
 		Loop that publishes the state of the sensor.
 		"""
 		while True:
-			# Publish the state
-			print(f"{self.device_header} Publishing state: {self.value}")
-			self.client.publish(
-				self.status_topic,
-				self.value,
-				qos=1,
-				retain=True,
-			)
+			# Wait the interval set
+			time.sleep(self.interval)
 
 			# Update the value:
 			# If it is > max value or < min value, the increment is set to the opposite sign
@@ -89,8 +113,9 @@ class DummySensorDevice(IOTDevice):
 				self.increment = -self.increment
 			self.value += self.increment
 
-			# Time to wait
-			time.sleep(self.interval)
+			# Publish the new state
+			self.publish_status()
+
 
 	def on_message(self, client, userdata, msg) -> None:
 		"""
@@ -100,8 +125,37 @@ class DummySensorDevice(IOTDevice):
 			userdata: The private user data as set in Client() or userdata_set in subscribe().
 			msg (mqtt.MQTTMessage): An instance of MQTTMessage.
 		"""
-		# No messages will be received, so this function is empty
-		pass
+		print(f"{self.device_header} Received message: {str(msg.payload.decode())}")
+		try:
+			payload = json.loads(msg.payload)
+		except json.JSONDecodeError:
+			print(f"{self.device_header} Bad message format")
+			return
+
+		# Check if a command has been received
+		if 'cmd' not in payload:
+			print(f"{self.device_header} Invalid message received, ignoring")
+			return
+
+		# Execute the command
+		current_command = self.commands.get(payload['cmd'])
+		if current_command:
+			current_command(client, userdata, payload)
+			return
+
+		# Comamnd not valid
+		print(f"{self.device_header} Invalid command received, ignoring")
+
+	def get_command(self, client, userdata, payload) -> None:
+		"""
+		Command that is executed when a message is received.
+		Args:
+			client (mqtt.Client): The client instance for this callback.
+			userdata: The private user data as set in Client() or userdata_set in subscribe().
+			payload (Any): The payload of the message.
+		"""
+		print(f"{self.device_header} Status is {self.value}")
+		self.publish_status()
 
 def parse_params() -> argparse.Namespace:
 	"""
