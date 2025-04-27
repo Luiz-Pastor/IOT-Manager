@@ -63,15 +63,15 @@ class DummyClockDevice(IOTDevice):
 		}
 
 	
-	def publish_status(self):
+	def publish_state(self):
 		"""
-		Publish the status of the sensor.
+		Publish the state of the sensor.
 		"""
 		# Publish the state
 		time_str = self.current_time.strftime("%H:%M:%S")
 		print(f"{self.device_header} Publishing state: {time_str}")
 		self.client.publish(
-			self.status_topic,
+			self.state_topic,
 			json.dumps({
 				"state": time_str,
 			}),
@@ -97,7 +97,7 @@ class DummyClockDevice(IOTDevice):
 		self.client.subscribe(self.command_topic)
 
 		# Publish the init state
-		self.publish_status()
+		self.publish_state()
 
 		# Create a thread that will be publishing the state
 		thread = threading.Thread(
@@ -122,7 +122,7 @@ class DummyClockDevice(IOTDevice):
 			self.current_time += timedelta(seconds=self.increment)
 
 			# Publish the state
-			self.publish_status()
+			self.publish_state()
 
 	def on_message(self, client, userdata, msg) -> None:
 		"""
@@ -161,8 +161,8 @@ class DummyClockDevice(IOTDevice):
 			userdata: The private user data as set in Client() or userdata_set in subscribe().
 			payload (Any): The payload of the message.
 		"""
-		print(f"{self.device_header} Status is {self.current_time.strftime('%H:%M:%S')}")
-		self.publish_status()
+		print(f"{self.device_header} state is {self.current_time.strftime('%H:%M:%S')}")
+		self.publish_state()
 
 
 def parse_params() -> argparse.Namespace:

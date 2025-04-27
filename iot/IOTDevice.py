@@ -29,7 +29,7 @@ class IOTDevice(ABC):
 		self.device_id = device_id
 
 		# Save the topics that will be used
-		self.status_topic = f"{self.TOPIC_BASENAME}/{self.device_id}"
+		self.state_topic = f"{self.TOPIC_BASENAME}/{self.device_id}"
 		self.command_topic = f"{self.TOPIC_BASENAME}/{self.device_id}/command"
 
 		# Create the client
@@ -85,8 +85,8 @@ class IOTDevice(ABC):
 		pass
 
 	@abstractmethod
-	def publish_status(self) -> None:
+	def publish_state(self) -> None:
 		"""
-		Publish the current status of the device.
+		Publish the current state of the device.
 		"""
 		pass

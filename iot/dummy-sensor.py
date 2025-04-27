@@ -56,14 +56,14 @@ class DummySensorDevice(IOTDevice):
 			'get': self.get_command,
 		}
 
-	def publish_status(self):
+	def publish_state(self):
 		"""
-		Publish the status of the sensor.
+		Publish the state of the sensor.
 		"""
 		# Publish the state
 		print(f"{self.device_header} Publishing state: {self.value}")
 		self.client.publish(
-			self.status_topic,
+			self.state_topic,
 			json.dumps({
 				"state": self.value,
 			}),
@@ -89,7 +89,7 @@ class DummySensorDevice(IOTDevice):
 		self.client.subscribe(self.command_topic)
 
 		# Publish the init state
-		self.publish_status()
+		self.publish_state()
 
 		# Create a thread that will be publishing the state
 		thead = threading.Thread(
@@ -114,7 +114,7 @@ class DummySensorDevice(IOTDevice):
 			self.value += self.increment
 
 			# Publish the new state
-			self.publish_status()
+			self.publish_state()
 
 
 	def on_message(self, client, userdata, msg) -> None:
@@ -154,8 +154,8 @@ class DummySensorDevice(IOTDevice):
 			userdata: The private user data as set in Client() or userdata_set in subscribe().
 			payload (Any): The payload of the message.
 		"""
-		print(f"{self.device_header} Status is {self.value}")
-		self.publish_status()
+		print(f"{self.device_header} State is {self.value}")
+		self.publish_state()
 
 def parse_params() -> argparse.Namespace:
 	"""

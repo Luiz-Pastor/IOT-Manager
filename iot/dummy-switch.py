@@ -45,7 +45,7 @@ class DummySwitchDevice(IOTDevice):
 		self.probability = probability
 
 		# Set the switch init state
-		self.status = SwitchState.SWITCH_OFF
+		self.state = SwitchState.SWITCH_OFF
 
 		# Device header, for debugging
 		self.device_header = f"[Dummy witch - {self.device_id}]"
@@ -56,14 +56,14 @@ class DummySwitchDevice(IOTDevice):
 			'set': self.set_command,
 		}
 
-	def publish_status(self) -> None:
+	def publish_state(self) -> None:
 		"""
-		Publish the current status of the device.
+		Publish the current state of the device.
 		"""
 		self.client.publish(
-			self.status_topic,
+			self.state_topic,
 			json.dumps({
-				"state": self.status.value,
+				"state": self.state.value,
 			}),
 			qos=1,
 			retain=True,
@@ -82,12 +82,12 @@ class DummySwitchDevice(IOTDevice):
 		print(f"{self.device_header} Connected with result code {rc}")
 
 		# Subscribe to the command topic
-		print(f"{self.device_header} Init state: {self.status.value}")
+		print(f"{self.device_header} Init state: {self.state.value}")
 		print(f"{self.device_header} Subscribing to {self.command_topic}", end="\n\n")
 		self.client.subscribe(self.command_topic)
 
 		# Publish the current state
-		self.publish_status()
+		self.publish_state()
 
 	def on_message(self, client, userdata, msg) -> None:
 		"""
@@ -129,8 +129,8 @@ class DummySwitchDevice(IOTDevice):
 			userdata (any): The private user data as set in Client() or userdata_set().
 			payload (json): The payload of the message, as JSON
 		"""
-		print(f"{self.device_header} Status is {self.status.value}")
-		self.publish_status()
+		print(f"{self.device_header} state is {self.state.value}")
+		self.publish_state()
 		
 	def set_command(self, client, userdata, payload) -> None:
 		"""
@@ -144,28 +144,28 @@ class DummySwitchDevice(IOTDevice):
 			print(f"{self.device_header} Error: no state received")
 			return
 
-		# Get the status from the enum
+		# Get the state from the enum
 		try:
-			received_status = SwitchState(payload['state'])
+			received_state = SwitchState(payload['state'])
 		except ValueError:
 			print(f"{self.device_header} Invalid state received, ignoring")
-			received_status = None
+			received_state = None
 		
-		# If the status is valid, try to change it
-		if received_status:
+		# If the state is valid, try to change it
+		if received_state:
 			random_number = random.randint(0, 100) / 100
 
 			# Simulate a failure
-			if received_status == self.status:
-				print(f"{self.device_header} Status is already {self.status.value}")
+			if received_state == self.state:
+				print(f"{self.device_header} state is already {self.state.value}")
 			elif random_number < self.probability:
 				print(f"{self.device_header} Simulating a failure")
 			else:
-				print(f"{self.device_header} Changing status from {self.status.value} to {received_status.value}")
-				self.status = received_status
+				print(f"{self.device_header} Changing state from {self.state.value} to {received_state.value}")
+				self.state = received_state
 		
 		# Publish the current state
-		self.publish_status()
+		self.publish_state()
 
 def parse_params() -> argparse.Namespace:
 	"""
