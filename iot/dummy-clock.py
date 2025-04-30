@@ -73,7 +73,7 @@ class DummyClockDevice(IOTDevice):
 		self.client.publish(
 			self.state_topic,
 			json.dumps({
-				"state": time_str,
+				"time": time_str,
 			}),
 			qos=1,
 			retain=True

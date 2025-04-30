@@ -39,7 +39,7 @@ El dispositivo va variando solo, de forma autónoma, por lo que el único comand
 	{
 		"cmd": "get"
 	}
-	/* Posible respuesta:  {"state": 25.0} */
+	/* Posible respuesta:  {"temperature": 25.0} */
 	```
 
 ### 2.3. Dummy Clock
@@ -52,5 +52,5 @@ Al igual que en el sensor, funciona automáticamente, lo único necesario sería
 	{
 		"cmd": "get"
 	}
-	/* Posible respuesta:  {"state": "12:00:04"} */
+	/* Posible respuesta:  {"time": "12:00:04"} */
 	```

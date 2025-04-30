@@ -65,7 +65,7 @@ class DummySensorDevice(IOTDevice):
 		self.client.publish(
 			self.state_topic,
 			json.dumps({
-				"state": self.value,
+				"temperature": self.value,
 			}),
 			qos=1,
 			retain=True,
