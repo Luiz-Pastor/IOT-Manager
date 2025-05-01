@@ -1,6 +1,6 @@
 from django.urls import path
-from .views import index
+from .views import DeviceCreateView
 
 urlpatterns = [
-	path('', index, name='index')
+	path("device/create", DeviceCreateView.as_view(), name="create-device"),
 ]
