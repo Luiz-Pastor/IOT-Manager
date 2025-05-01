@@ -6,5 +6,5 @@ from .views import (
 
 urlpatterns = [
 	path("", IndexView.as_view(), name="index"),
-	path("device/create", DeviceCreateView.as_view(), name="create-device"),
+	path("device/create", DeviceCreateView.as_view(), name="device-create"),
 ]
