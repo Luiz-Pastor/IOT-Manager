@@ -24,10 +24,8 @@ class DeviceCreateView(CreateView):
     """
     View to create a new device.
     """
-    template_name = "devices/device_create.html"
-    
-    # TODO: Change it by the index url, using reverse_lazy
-    success_url = '/'
+    template_name = "devices/device_create.html"    
+    success_url = reverse_lazy("index")
 
     def dispatch(self, request, *args, **kwargs):
         """
@@ -56,13 +54,11 @@ class DeviceCreateView(CreateView):
         return form_class
 
     def get_context_data(self, **ctx):
-        ctx = super().get_context_data(**ctx)
-        # nombre legible del tipo
+        context = super().get_context_data(**ctx)
         _, pretty = DEVICE_FORMS[self.dev_type]
-        ctx["device_type_name"] = pretty
-        # para el hidden en el form
-        ctx["dev_type"] = self.dev_type
-        return ctx
+        context["device_type_name"] = pretty
+        context["dev_type"] = self.dev_type
+        return context
 
     def form_valid(self, form):
         # TODO: send the information to the controller
