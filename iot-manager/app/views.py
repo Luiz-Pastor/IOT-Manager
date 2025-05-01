@@ -4,56 +4,66 @@ from django.shortcuts import redirect
 from .models import DummySensor, DummyClock, DummySwitch
 from .forms import DummySensorForm, DummyClockForm, DummySwitchForm
 
+
+# devices/views.py (o en un módulo común, p.ej. core/views.py)
+
+class IndexView(TemplateView):
+    """
+    Index view for the devices and rules.
+    """
+    template_name = "index.html"
+
+
 DEVICE_FORMS = {
-	"sensor":  (DummySensorForm,  "DummySensor"),
-	"clock":   (DummyClockForm,   "DummyClock"),
-	"switch":  (DummySwitchForm,  "DummySwitch"),
+    "sensor":  (DummySensorForm,  "DummySensor"),
+    "clock":   (DummyClockForm,   "DummyClock"),
+    "switch":  (DummySwitchForm,  "DummySwitch"),
 }
 
 class DeviceCreateView(CreateView):
-	"""
-	View to create a new device.
-	"""
-	template_name = "devices/device_create.html"
-	
-	# TODO: Change it by the index url, using reverse_lazy
-	success_url = '/'
+    """
+    View to create a new device.
+    """
+    template_name = "devices/device_create.html"
+    
+    # TODO: Change it by the index url, using reverse_lazy
+    success_url = '/'
 
-	def dispatch(self, request, *args, **kwargs):
-		"""
-		Redirect taking into account the device type.
-		"""
-		# Get the device type
-		self.dev_type = request.GET.get("type")
-		if request.method == "POST":
-			self.dev_type = request.POST.get("dev_type")
-		
-		# If there is no device, or an unknown one, show the type selection
-		if not self.dev_type or self.dev_type not in DEVICE_FORMS:
-			return TemplateView.as_view(
-				template_name="devices/device_type_select.html"
-			)(request, *args, **kwargs)
-		
-		# If the device type is valid, continue with the form
-		return super().dispatch(request, *args, **kwargs)
+    def dispatch(self, request, *args, **kwargs):
+        """
+        Redirect taking into account the device type.
+        """
+        # Get the device type
+        self.dev_type = request.GET.get("type")
+        if request.method == "POST":
+            self.dev_type = request.POST.get("dev_type")
+        
+        # If there is no device, or an unknown one, show the type selection
+        if not self.dev_type or self.dev_type not in DEVICE_FORMS:
+            return TemplateView.as_view(
+                template_name="devices/device_type_select.html"
+            )(request, *args, **kwargs)
+        
+        # If the device type is valid, continue with the form
+        return super().dispatch(request, *args, **kwargs)
 
-	def get_form_class(self):
-		"""
-		Get the form class based on the device type.
-		Used to know what form has to be redered
-		"""
-		form_class, _ = DEVICE_FORMS[self.dev_type]
-		return form_class
+    def get_form_class(self):
+        """
+        Get the form class based on the device type.
+        Used to know what form has to be redered
+        """
+        form_class, _ = DEVICE_FORMS[self.dev_type]
+        return form_class
 
-	def get_context_data(self, **ctx):
-		ctx = super().get_context_data(**ctx)
-		# nombre legible del tipo
-		_, pretty = DEVICE_FORMS[self.dev_type]
-		ctx["device_type_name"] = pretty
-		# para el hidden en el form
-		ctx["dev_type"] = self.dev_type
-		return ctx
+    def get_context_data(self, **ctx):
+        ctx = super().get_context_data(**ctx)
+        # nombre legible del tipo
+        _, pretty = DEVICE_FORMS[self.dev_type]
+        ctx["device_type_name"] = pretty
+        # para el hidden en el form
+        ctx["dev_type"] = self.dev_type
+        return ctx
 
-	def form_valid(self, form):
-		# TODO: send the information to the controller
-		return super().form_valid(form)
+    def form_valid(self, form):
+        # TODO: send the information to the controller
+        return super().form_valid(form)
