@@ -4,3 +4,5 @@ from .dummy_sensor import DummySensor
 from .dummy_switch import DummySwitch
 
 from .rule import Rule
+
+from .log import Log
