@@ -22,7 +22,7 @@
         <td>{{ device.port }}</td>
         <td class="text-end">
 			{% comment %} Add the link: {% url 'device_detail' device.id %} {% endcomment %}
-          <a href="" 
+          <a href="{% url 'device-detail' device.id %}" 
              class="btn btn-sm btn-outline-primary me-1">
             <i class="bi bi-gear"></i> Configuration
           </a>
