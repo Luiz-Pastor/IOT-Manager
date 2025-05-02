@@ -22,7 +22,10 @@ class RuleForm(forms.ModelForm):
         model = Rule
         fields = ['name', 'source_device', 'operator', 'threshold', 'target_device', 'command_payload']
         widgets = {
-            'name': forms.TextInput(attrs={'class': 'form-control'}),
+            'name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Kitchen temperature manager'
+            },),
             'source_device': forms.Select(attrs={'class': 'form-select'}),
             'operator': forms.Select(attrs={'class': 'form-select'}),
             'threshold': forms.TextInput(attrs={'class': 'form-control'}),
@@ -30,5 +33,10 @@ class RuleForm(forms.ModelForm):
             'command_payload': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
         help_texts = {
-            'command_payload': 'Debe incluir al menos el campo "cmd", e.j. {"cmd":"set","state":"ON"}',
+            'name': 'Name of the rule to create',
+            'source_device': 'Device that will activate the rule',
+            'operator': 'Comparation to do between the value and the threshold',
+            'threshold': 'Value to compare with the actual limit value',
+            'target_device': 'Device to which the message will be sent if the condition is met',
+            'command_payload': 'Message to send. Has to have the "cmd" field, e.j. {"cmd":"set","state":"ON"}',
         }
