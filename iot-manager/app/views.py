@@ -1,7 +1,7 @@
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, TemplateView
+from django.views.generic import CreateView, TemplateView, ListView
 from django.shortcuts import redirect
-from .models import DummySensor, DummyClock, DummySwitch
+from .models import Device, DummySensor, DummyClock, DummySwitch
 from .forms import DummySensorForm, DummyClockForm, DummySwitchForm
 
 
@@ -63,3 +63,12 @@ class DeviceCreateView(CreateView):
     def form_valid(self, form):
         # TODO: send the information to the controller
         return super().form_valid(form)
+
+class DeviceListView(ListView):
+    """
+    Show all the registered devices
+    """
+    model = Device
+    template_name = "devices/device_list.html"
+    context_object_name = "devices"
+    paginate_by = 10
