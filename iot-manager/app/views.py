@@ -157,3 +157,7 @@ class RuleUpdateView(UpdateView):
     form_class = RuleForm
     template_name = "rules/rule_update.html"
     success_url = reverse_lazy("rule-list")
+
+    def form_valid(self, form):
+        # TODO: send the information to the controller
+        return super().form_valid(form)
