@@ -27,6 +27,16 @@ class Device(models.Model):
 		"""
 		return f"{self.id} @ {self.host}:{self.port}"
 
+	def get_concrete(self):
+		for rel in self._meta.related_objects:
+			if rel.one_to_one and rel.auto_created:
+				accessor = rel.get_accessor_name()
+				try:
+					return getattr(self, accessor)
+				except models.ObjectDoesNotExist:
+					continue
+		return self
+
 	###############
 	# NOTE: Topic #
 	###############
@@ -52,4 +62,11 @@ class Device(models.Model):
 		"""
 		Returns the variable name of the device message key.
 		"""
-		raise NotImplementedError("Subclasses must implement this method")
+		concrete = self.get_concrete()
+		if concrete is self:
+			raise NotImplementedError("Subclasses must implement this method")
+
+		try:
+			return concrete.variable_name
+		except AttributeError:
+			raise NotImplementedError("Subclasses must implement this method")
