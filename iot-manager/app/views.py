@@ -1,9 +1,24 @@
 from django.urls import reverse, reverse_lazy
-from django.views.generic import CreateView, TemplateView, ListView, DetailView
+from django.views.generic import (
+	CreateView,
+	TemplateView,
+	ListView,
+	DetailView,
+	UpdateView,
+)
 from django.views.decorators.http import require_POST
 from django.shortcuts import redirect, get_object_or_404
-from .models import Device, DummySensor, DummyClock, DummySwitch, Rule
-from .forms import DummySensorForm, DummyClockForm, DummySwitchForm, RuleForm
+
+from .models import (
+	Device,
+	Rule
+)
+from .forms import (
+	DummySensorForm,
+	DummyClockForm,
+	DummySwitchForm,
+	RuleForm
+)
 
 ##############
 # NOTE: Home #
@@ -132,3 +147,13 @@ class RuleDetailView(DetailView):
     model = Rule
     template_name = "rules/rule_detail.html"
     context_object_name = "rule"
+
+class RuleUpdateView(UpdateView):
+    """
+    Muestra un formulario para editar una regla existente
+    y actualiza la base de datos.
+    """
+    model = Rule
+    form_class = RuleForm
+    template_name = "rules/rule_update.html"
+    success_url = reverse_lazy("index")
