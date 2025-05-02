@@ -1,5 +1,5 @@
 from django.urls import reverse, reverse_lazy
-from django.views.generic import CreateView, TemplateView, ListView
+from django.views.generic import CreateView, TemplateView, ListView, DetailView
 from django.views.decorators.http import require_POST
 from django.shortcuts import redirect, get_object_or_404
 from .models import Device, DummySensor, DummyClock, DummySwitch
@@ -82,3 +82,11 @@ def device_delete(request, pk):
     device = get_object_or_404(Device, pk=pk)
     device.delete()
     return redirect(reverse('device-list'))
+
+class DeviceDetailView(DetailView):
+    """
+    Muestra todos los datos (comunes y específicos) de un dispositivo.
+    """
+    model = Device
+    template_name = "devices/device_detail.html"
+    context_object_name = "device"
