@@ -110,3 +110,8 @@ class RuleCreateView(CreateView):
     def form_valid(self, form):
         # TODO: send the information to the controller
         return super().form_valid(form)
+
+class RuleListView(ListView):
+    model = Rule
+    template_name = "rules/rule_list.html"
+    context_object_name = "rules"
