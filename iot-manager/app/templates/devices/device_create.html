@@ -27,7 +27,7 @@
       <input type="hidden" name="dev_type" value="{{ dev_type }}"/>
       <div class="d-flex justify-content-end">
 		{% comment %} TODO: Links {% endcomment %}
-        <a href="" class="btn btn-secondary me-2">
+        <a href="{% url 'device-create' %}" class="btn btn-secondary me-2">
           Cancel
         </a>
         <button type="submit" class="btn btn-success">
