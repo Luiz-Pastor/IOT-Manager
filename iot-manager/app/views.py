@@ -105,4 +105,8 @@ class RuleCreateView(CreateView):
     model = Rule
     form_class = RuleForm
     template_name = "rules/rule_form.html"
-    success_url = reverse_lazy("index") 
+    success_url = reverse_lazy("index")
+
+    def form_valid(self, form):
+        # TODO: send the information to the controller
+        return super().form_valid(form)
