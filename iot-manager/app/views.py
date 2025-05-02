@@ -115,3 +115,12 @@ class RuleListView(ListView):
     model = Rule
     template_name = "rules/rule_list.html"
     context_object_name = "rules"
+
+@require_POST
+def rule_delete(request, pk):
+    """
+    Delete the rule with the provided primary key
+    """
+    rule = get_object_or_404(Rule, pk=pk)
+    rule.delete()
+    return redirect(reverse('rule-list'))

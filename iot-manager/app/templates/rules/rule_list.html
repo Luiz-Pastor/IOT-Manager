@@ -30,8 +30,7 @@
 			   class="btn btn-sm btn-outline-primary me-1">
 			  <i class="bi bi-eye"></i> Configuration
 			</a>
-			{% comment %} {% url 'rules:rule_delete' rule.pk %} {% endcomment %}
-			<form action=""
+			<form action="{% url 'rule-delete' rule.pk %}"
 				  method="post" class="d-inline">
 			  {% csrf_token %}
 			  <button type="submit"
@@ -50,7 +49,6 @@
 	</tbody>
   </table>
   <div class="mt-3">
-	{% comment %}  {% endcomment %}
 	<a href="{% url 'rule-create' %}" class="btn btn-warning">
 		<i class="bi bi-plus-circle"></i> New rule
 	</a>

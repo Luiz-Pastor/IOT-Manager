@@ -8,7 +8,8 @@ from .views import (
 	DeviceDetailView,
 
 	RuleCreateView,
-	RuleListView
+	RuleListView,
+	rule_delete
 )
 
 urlpatterns = [
@@ -21,4 +22,5 @@ urlpatterns = [
 
 	path("rule/create", RuleCreateView.as_view(), name='rule-create'),
 	path("rule/list", RuleListView.as_view(), name="rule-list"),
+	path("rule/delete/<str:pk>", rule_delete, name="rule-delete"),
 ]
