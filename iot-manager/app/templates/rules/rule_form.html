@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+
+{% block title %}Create rule{% endblock %}
+
+{% block content %}
+<div class="card mx-auto" style="max-width: 700px;">
+  <div class="card-header bg-warning text-dark">
+    <h4 class="mb-0"><i class="bi bi-list-check"></i> Create rule</h4>
+  </div>
+  <div class="card-body">
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {{ form.non_field_errors }}
+
+      <div class="row mb-3 align-items-center">
+        <label for="{{ form.name.id_for_label }}" class="col-sm-4 col-form-label">
+          {{ form.name.label }}
+        </label>
+        <div class="col-sm-8">
+          {{ form.name }}
+          {% if form.name.help_text %}
+            <small class="form-text"><i>{{ form.name.help_text }}</i></small>
+          {% endif %}
+          {{ form.name.errors }}
+        </div>
+      </div>
+
+      <div class="row mb-3 align-items-center">
+        <label for="{{ form.source_device.id_for_label }}" class="col-sm-4 col-form-label">
+          {{ form.source_device.label }}
+        </label>
+        <div class="col-sm-8">
+          {{ form.source_device }}
+          {% if form.source_device.help_text %}
+		  	<small class="form-text"><i>{{ form.source_device.help_text }}</i></small>
+          {% endif %}
+          {{ form.source_device.errors }}
+        </div>
+      </div>
+
+      <div class="row mb-3 align-items-center">
+        <label for="{{ form.operator.id_for_label }}" class="col-sm-4 col-form-label">
+          {{ form.operator.label }}
+        </label>
+        <div class="col-sm-8">
+          {{ form.operator }}
+          {% if form.operator.help_text %}
+		  	<small class="form-text"><i>{{ form.operator.help_text }}</i></small>
+          {% endif %}
+          {{ form.operator.errors }}
+        </div>
+      </div>
+
+      <div class="row mb-3 align-items-center">
+        <label for="{{ form.threshold.id_for_label }}" class="col-sm-4 col-form-label">
+          {{ form.threshold.label }}
+        </label>
+        <div class="col-sm-8">
+          {{ form.threshold }}
+          {% if form.threshold.help_text %}
+		  	<small class="form-text"><i>{{ form.threshold.help_text }}</i></small>
+          {% endif %}
+          {{ form.threshold.errors }}
+        </div>
+      </div>
+
+      <div class="row mb-3 align-items-center">
+        <label for="{{ form.target_device.id_for_label }}" class="col-sm-4 col-form-label">
+          {{ form.target_device.label }}
+        </label>
+        <div class="col-sm-8">
+          {{ form.target_device }}
+          {% if form.target_device.help_text %}
+		  	<small class="form-text"><i>{{ form.target_device.help_text }}</i></small>
+          {% endif %}
+          {{ form.target_device.errors }}
+        </div>
+      </div>
+
+      <div class="row mb-3 align-items-start">
+        <label for="{{ form.command_payload.id_for_label }}" class="col-sm-4 col-form-label">
+          {{ form.command_payload.label }}
+        </label>
+        <div class="col-sm-8">
+          {{ form.command_payload }}
+          {% if form.command_payload.help_text %}
+		  	<small class="form-text"><i>{{ form.command_payload.help_text }}</i></small>
+          {% endif %}
+          {{ form.command_payload.errors }}
+        </div>
+      </div>
+
+      <div class="d-flex justify-content-end">
+        <a href="{% url 'index' %}" class="btn btn-secondary me-2">
+          <i class="bi bi-arrow-left"></i> Go home
+        </a>
+        <button type="submit" class="btn btn-warning">
+          Save rule
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
