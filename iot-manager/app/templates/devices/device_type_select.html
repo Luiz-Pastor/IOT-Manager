@@ -5,7 +5,7 @@
 {% block content %}
 <div class="card mx-auto" style="max-width: 500px;">
   <div class="card-header">
-    <h4 class="mb-0">Selecciona tipo de dispositivo</h4>
+    <h4 class="mb-0">Select device type</h4>
   </div>
   <div class="card-body">
     <div class="d-grid gap-2">
@@ -22,7 +22,7 @@
   </div>
   <div class="card-footer text-end">
 	{% comment %} TODO: Links {% endcomment %}
-    <a href="" class="btn btn-link">Cancelar</a>
+    <a href="{% url 'index' %}" class="btn btn-link">Cancel</a>
   </div>
 </div>
 {% endblock %}
