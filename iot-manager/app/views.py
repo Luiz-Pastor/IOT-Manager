@@ -1,6 +1,7 @@
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.views.generic import CreateView, TemplateView, ListView
-from django.shortcuts import redirect
+from django.views.decorators.http import require_POST
+from django.shortcuts import redirect, get_object_or_404
 from .models import Device, DummySensor, DummyClock, DummySwitch
 from .forms import DummySensorForm, DummyClockForm, DummySwitchForm
 
@@ -72,3 +73,12 @@ class DeviceListView(ListView):
     template_name = "devices/device_list.html"
     context_object_name = "devices"
     paginate_by = 10
+
+@require_POST
+def device_delete(request, pk):
+    """
+    Delete the device with the provided primary key
+    """
+    device = get_object_or_404(Device, pk=pk)
+    device.delete()
+    return redirect(reverse('device-list'))
