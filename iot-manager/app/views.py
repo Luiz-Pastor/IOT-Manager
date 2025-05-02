@@ -46,7 +46,7 @@ class DeviceCreateView(CreateView):
     View to create a new device.
     """
     template_name = "devices/device_create.html"    
-    success_url = reverse_lazy("index")
+    success_url = reverse_lazy("device-list")
 
     def dispatch(self, request, *args, **kwargs):
         """
@@ -120,7 +120,7 @@ class RuleCreateView(CreateView):
     model = Rule
     form_class = RuleForm
     template_name = "rules/rule_form.html"
-    success_url = reverse_lazy("index")
+    success_url = reverse_lazy("rule-list")
 
     def form_valid(self, form):
         # TODO: send the information to the controller
@@ -156,4 +156,4 @@ class RuleUpdateView(UpdateView):
     model = Rule
     form_class = RuleForm
     template_name = "rules/rule_update.html"
-    success_url = reverse_lazy("index")
+    success_url = reverse_lazy("rule-list")
