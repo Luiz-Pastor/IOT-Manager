@@ -2,11 +2,12 @@ from django.urls import reverse, reverse_lazy
 from django.views.generic import CreateView, TemplateView, ListView, DetailView
 from django.views.decorators.http import require_POST
 from django.shortcuts import redirect, get_object_or_404
-from .models import Device, DummySensor, DummyClock, DummySwitch
-from .forms import DummySensorForm, DummyClockForm, DummySwitchForm
+from .models import Device, DummySensor, DummyClock, DummySwitch, Rule
+from .forms import DummySensorForm, DummyClockForm, DummySwitchForm, RuleForm
 
-
-# devices/views.py (o en un módulo común, p.ej. core/views.py)
+##############
+# NOTE: Home #
+##############
 
 class IndexView(TemplateView):
     """
@@ -14,6 +15,10 @@ class IndexView(TemplateView):
     """
     template_name = "index.html"
 
+
+#################
+# NOTE: Devices #
+#################
 
 DEVICE_FORMS = {
     "sensor":  (DummySensorForm,  "DummySensor"),
@@ -90,3 +95,14 @@ class DeviceDetailView(DetailView):
     model = Device
     template_name = "devices/device_detail.html"
     context_object_name = "device"
+
+
+###############
+# NOTE: Rules #
+###############
+
+class RuleCreateView(CreateView):
+    model = Rule
+    form_class = RuleForm
+    template_name = "rules/rule_form.html"
+    success_url = reverse_lazy("index") 
