@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block title %}"{{ rule.name }}" Rule{% endblock %}
+
+{% block content %}
+<p>
+  <a href="{% url 'index' %}" class="btn btn-outline-secondary me-2">
+    <i class="bi bi-house"></i> Home
+  </a>
+  <a href="{% url 'rule-list' %}" class="btn btn-outline-secondary">
+    <i class="bi bi-arrow-left"></i> Go back to rule list
+  </a>
+</p>
+
+<div class="card mx-auto" style="max-width: 700px;">
+  <div class="card-header bg-warning text-dark">
+    <h4 class="mb-0"><i class="bi bi-gear"></i> "{{ rule.name }}" configuration</h4>
+  </div>
+  <div class="card-body">
+    <dl class="row">
+      <dt class="col-sm-4">Name</dt>
+      <dd class="col-sm-8">{{ rule.name }}</dd>
+
+      <dt class="col-sm-4">Source device</dt>
+      <dd class="col-sm-8">
+		<a
+			href="{% url 'device-detail' rule.source_device.id %}"
+			class="link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover"
+		>
+        	{{ rule.source_device.id }}
+		</a>
+      </dd>
+
+	  <dt class="col-sm-4">Variable to check</dt>
+	  <dd class="col-sm-8">{{ rule.source_device.variable_name }}</dd>
+
+      <dt class="col-sm-4">Operator (comparation)</dt>
+      <dd class="col-sm-8">{{ rule.get_operator_display }}</dd>
+
+      <dt class="col-sm-4">Threshold</dt>
+      <dd class="col-sm-8">{{ rule.threshold }}</dd>
+
+      <dt class="col-sm-4">Target device</dt>
+      <dd class="col-sm-8">
+		<a
+		href="{% url 'device-detail' rule.target_device.id %}"
+		class="link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover"
+		>
+			{{ rule.target_device.id }}
+	  </a>
+	</dd>
+
+      <dt class="col-sm-4">Payload</dt>
+      <dd class="col-sm-8"><pre>{{ rule.command_payload }}</pre></dd>
+    </dl>
+
+    <div class="mt-4 text-end">
+		{% comment %} {% url 'rules:rule_update' rule.pk %} {% endcomment %}
+      <a href="" class="btn btn-primary me-2">
+        <i class="bi bi-pencil"></i> Edit
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

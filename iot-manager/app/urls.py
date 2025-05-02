@@ -9,7 +9,8 @@ from .views import (
 
 	RuleCreateView,
 	RuleListView,
-	rule_delete
+	rule_delete,
+	RuleDetailView
 )
 
 urlpatterns = [
@@ -22,5 +23,6 @@ urlpatterns = [
 
 	path("rule/create", RuleCreateView.as_view(), name='rule-create'),
 	path("rule/list", RuleListView.as_view(), name="rule-list"),
-	path("rule/delete/<str:pk>", rule_delete, name="rule-delete"),
+	path("rule/delete/<int:pk>", rule_delete, name="rule-delete"),
+	path("rule/<int:pk>", RuleDetailView.as_view(), name="rule-detail"),
 ]

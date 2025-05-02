@@ -124,3 +124,11 @@ def rule_delete(request, pk):
     rule = get_object_or_404(Rule, pk=pk)
     rule.delete()
     return redirect(reverse('rule-list'))
+
+class RuleDetailView(DetailView):
+    """
+    Muestra los datos de una regla.
+    """
+    model = Rule
+    template_name = "rules/rule_detail.html"
+    context_object_name = "rule"
