@@ -11,7 +11,8 @@ from django.shortcuts import redirect, get_object_or_404
 
 from .models import (
 	Device,
-	Rule
+	Rule,
+    Log
 )
 from .forms import (
 	DummySensorForm,
@@ -161,3 +162,18 @@ class RuleUpdateView(UpdateView):
     def form_valid(self, form):
         # TODO: send the information to the controller
         return super().form_valid(form)
+
+##############
+# NOTE: Logs #
+##############
+
+# logs/views.py
+
+class LogListView(ListView):
+    """
+    Muestra todos los registros de log ordenados por fecha descendente.
+    """
+    model = Log
+    template_name = "logs/log_list.html"
+    context_object_name = "logs"
+    paginate_by = 20

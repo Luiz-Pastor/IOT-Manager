@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block title %}Log registers{% endblock %}
+
+{% block content %}
+  <p>
+    <a href="{% url 'index' %}" class="btn btn-outline-secondary mb-3">
+      <i class="bi bi-house"></i> Home
+    </a>
+  </p>
+  <h3>Log registers</h3>
+  <table class="table table-hover">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Message</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for log in logs %}
+        <tr>
+          <td class="text-nowrap">{{ log.timestamp|date:"Y-m-d H:i:s" }}</td>
+          <td>{{ log.message }}</td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="2" class="text-center">No logs registered</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {% if is_paginated %}
+    <nav aria-label="Paginación">
+      <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+          </li>
+        {% else %}
+          <li class="page-item disabled"><span class="page-link">Previous</span></li>
+        {% endif %}
+        <li class="page-item active">
+          <span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+        </li>
+        {% if page_obj.has_next %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+          </li>
+        {% else %}
+          <li class="page-item disabled"><span class="page-link">Previous</span></li>
+        {% endif %}
+      </ul>
+    </nav>
+  {% endif %}
+{% endblock %}
