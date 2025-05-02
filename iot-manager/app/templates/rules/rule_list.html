@@ -25,8 +25,7 @@
 		  </td>
 		  <td class="text-center">{{ rule.target_device.id }}</td>
 		  <td class="text-center">
-			{% comment %} {% url 'rules:rule_detail' rule.pk %} {% endcomment %}
-			<a href=""
+			<a href="{% url 'rule-detail' rule.pk %}"
 			   class="btn btn-sm btn-outline-primary me-1">
 			  <i class="bi bi-eye"></i> Configuration
 			</a>
