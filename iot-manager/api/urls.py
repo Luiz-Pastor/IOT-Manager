@@ -1,13 +1,15 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import (
-	DeviceViewSet
+	DeviceViewSet,
+	RuleViewSet,
+	LogViewSet,
 )
 
 router = DefaultRouter()
 router.register(r'devices', DeviceViewSet, basename='device')
-# router.register(r'rules', ----, basename='rule')
-# router.register(r'logs', ----, basename='log')
+router.register(r'rules', RuleViewSet, basename='rule')
+router.register(r'logs', LogViewSet, basename='log')
 
 urlpatterns = [
 	path('', include(router.urls)),
