@@ -6,6 +6,8 @@ from .views import (
 	LogViewSet,
 )
 
+app_name = 'api'
+
 router = DefaultRouter()
 router.register(r'devices', DeviceViewSet, basename='device')
 router.register(r'rules', RuleViewSet, basename='rule')
