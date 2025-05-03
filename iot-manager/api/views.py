@@ -37,4 +37,4 @@ class LogViewSet(
 	"""
 	queryset = Log.objects.all()
 	serializer_class = LogSerializer
-	http_method_names = ['post']
+	http_method_names = ['POST']
