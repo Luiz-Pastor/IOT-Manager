@@ -3,6 +3,7 @@ import argparse
 from typing import Union, Tuple, List
 from .device import Device
 from .rule import Rule
+from .IOTController import IOTController
 from .api_communication import (
 	get_devices_from_api,
 	get_rules_from_api
@@ -115,9 +116,25 @@ def main():
 	if not correct:
 		print(rules)
 		sys.exit(1)
-	
-	print("Devices: ", devices)
-	print("Rules: ", rules)
+
+	# Create the controller, and run it
+	controller = IOTController(
+		mqtt_host=args.host,
+		mqtt_port=args.port,
+		devices=devices,
+		rules=rules
+	)
+	controller.start()
+
+	# TODO: Wait messages from the django (user)
+
+	# Loop until a SIGINT is received
+	try:
+		while True:
+			pass
+	except KeyboardInterrupt:
+		print("[ Controller ] Stopping...")
+
 
 if __name__ == '__main__':
 	main()

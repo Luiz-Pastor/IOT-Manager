@@ -2,6 +2,7 @@ from .device import Device
 from .rule import Rule
 from typing import List, Dict, Any
 import paho.mqtt.client as mqtt
+import threading
 
 class IOTController:
 	def __init__(
@@ -22,6 +23,22 @@ class IOTController:
 		self.client.on_connect = self.on_connect
 		self.client.on_message = self.on_message
 
+	def start(self) -> None:
+		"""
+		Connect to the MQTT broker and start the loop.
+		"""
+		# Connect to the broker
+		self.client.connect(
+			self.mqtt_host,
+			self.mqtt_port,
+		)
+
+		# Execute, in a thread, the loop, so the main one can be still being used
+		thread = threading.Thread(
+			target=self.client.loop_forever,
+			daemon=True
+		)
+		thread.start()
 
 	def on_connect(self, client, userdata, flags, rc):
 		"""
