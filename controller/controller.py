@@ -121,6 +121,8 @@ def main():
 	controller = IOTController(
 		mqtt_host=args.host,
 		mqtt_port=args.port,
+		server_host=args.server_host,
+		server_port=args.server_port,
 		devices=devices,
 		rules=rules
 	)
