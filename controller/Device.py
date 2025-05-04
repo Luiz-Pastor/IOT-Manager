@@ -42,7 +42,7 @@ class Device:
 					current['id'],
 					current['host'],
 					current['port'],
-					current['device_taype'],
+					current['device_type'],
 					current['configuration']
 				)
 				devices.append(new_device)
