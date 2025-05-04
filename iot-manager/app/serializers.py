@@ -13,49 +13,56 @@ class DeviceSerializer(serializers.ModelSerializer):
     device_type = serializers.SerializerMethodField()
 
     # Specific config for each device
-    config      = serializers.SerializerMethodField()
+    configuration = serializers.SerializerMethodField()
 
     class Meta:
         model = Device
-        fields = ['id','host','port','device_type','config']
+        fields = ['id','host','port','device_type','configuration']
 
     def get_device_type(self, obj):
         """
         Returns the specific type of device.
-        To it, check if it has the specific attribute
+        To it, check if it has the specific attribute.
+        
+        It is made in such a way that what is returned is
+        the name of the script to be executed, so that the
+        controller is as generic as possible.
         """
-        if hasattr(obj, 'dummysensor'): return 'dummysensor'
-        if hasattr(obj, 'dummyclock'):  return 'dummyclock'
-        if hasattr(obj, 'dummyswitch'): return 'dummyswitch'
+        if hasattr(obj, 'dummysensor'): return 'dummy-sensor'
+        if hasattr(obj, 'dummyclock'):  return 'dummy-clock'
+        if hasattr(obj, 'dummyswitch'): return 'dummy-switch'
 
         # This case should not happen if the device is created corerctly in the app
         return 'unknown'
 
-    def get_config(self, obj):
+    def get_configuration(self, obj):
         """
         Returns the specific config for the device.
         To it, check if it has the specific attribute, and for aech case it
         return the correct data
         """
         concrete = obj.get_concrete()
+        configuration = {}
         if hasattr(concrete, 'interval'):
-            return {
+            configuration = {
                 'interval':  concrete.interval,
                 'min_value': concrete.min_value,
                 'max_value': concrete.max_value,
                 'increment': concrete.increment,
             }
         if hasattr(concrete, 'start_time'):
-            return {
+            configuration = {
                 'start_time': concrete.start_time.isoformat(),
                 'increment':  concrete.increment,
                 'rate':       concrete.rate,
             }
         if hasattr(concrete, 'probability'):
-            return {'probability': concrete.probability}
+            configuration = {
+                'probability': concrete.probability
+            }
         
         # This case should not happen if the device is created corerctly in the app
-        return {}
+        return configuration
         
 class RuleSerializer(serializers.ModelSerializer):
     """
