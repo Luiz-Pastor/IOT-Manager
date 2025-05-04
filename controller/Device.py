@@ -6,6 +6,8 @@ class Device:
 		id: str,
 		host: str,
 		port: int,
+		status_topic: str,
+		command_topic: str,
 		device_type: str,
 		configuration: Dict[str, str]
 	):
@@ -21,6 +23,8 @@ class Device:
 		self.id = id
 		self.host = host
 		self.port = port
+		self.status_topic = status_topic
+		self.command_topic = command_topic
 		self.type = device_type
 		self.configuration = configuration
 	

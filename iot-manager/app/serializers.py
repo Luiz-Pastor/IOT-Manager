@@ -17,7 +17,7 @@ class DeviceSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Device
-        fields = ['id','host','port','device_type','configuration']
+        fields = ['id','host','port', 'status_topic', 'command_topic', 'device_type','configuration']
 
     def get_device_type(self, obj):
         """
