@@ -12,12 +12,24 @@ class DeviceSerializer(serializers.ModelSerializer):
     # Device type (dummysensor, dummyclock or dummyswitch)
     device_type = serializers.SerializerMethodField()
 
+    # Specific variable where the device state is stored
+    state_variable = serializers.SerializerMethodField()
+
     # Specific config for each device
     configuration = serializers.SerializerMethodField()
 
     class Meta:
         model = Device
-        fields = ['id','host','port', 'status_topic', 'command_topic', 'device_type','configuration']
+        fields = [
+            'id',
+            'host',
+            'port',
+            'status_topic',
+            'command_topic',
+            'device_type',
+            'state_variable',
+            'configuration'
+        ]
 
     def get_device_type(self, obj):
         """
@@ -34,6 +46,13 @@ class DeviceSerializer(serializers.ModelSerializer):
 
         # This case should not happen if the device is created corerctly in the app
         return 'unknown'
+
+    def get_state_variable(self, obj):
+        try:
+            concrete = obj.get_concrete()
+            return concrete.variable_name
+        except Exception:
+            return None
 
     def get_configuration(self, obj):
         """
