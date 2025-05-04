@@ -1,4 +1,6 @@
 import argparse
+from .api_communication import get_devices_from_api
+from .device import Device
 
 def parse_params() -> argparse.Namespace:
 	"""
@@ -21,7 +23,7 @@ def parse_params() -> argparse.Namespace:
 		help="Port of the MQTT broker (default: %(default)s)"
 	)
 	params.add_argument(
-		"-sh", "--server-host", default="localhost",
+		"-sh", "--server-host", default="http://localhost",
 		help="Host of the Django (main) server (default: %(default)s)"
 	)
 	params.add_argument(
@@ -39,7 +41,10 @@ def main():
 	"""
 	# Parse the params
 	args = parse_params()
-	print(args)
+
+	# Load the devices
+	devices_data = get_devices_from_api(args.server_host, args.server_port)
+	devices = Device.from_api(devices_data)
 
 if __name__ == '__main__':
 	main()
