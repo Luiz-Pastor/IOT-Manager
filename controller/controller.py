@@ -2,7 +2,11 @@ import sys
 import argparse
 from typing import Union, Tuple, List
 from .device import Device
-from .api_communication import get_devices_from_api
+from .rule import Rule
+from .api_communication import (
+	get_devices_from_api,
+	get_rules_from_api
+)
 
 def parse_params() -> argparse.Namespace:
 	"""
@@ -65,6 +69,34 @@ def load_devices(
 	# Return the correct data
 	return devices, True
 
+def load_rules(
+		host: str,
+		port: int
+) -> Tuple[Union[str, List[Rule]], bool]:
+	"""
+	Function to load the rules from the API.
+	Args:
+		host (str): Host of the Django server.
+		port (int): Port of the Django server.
+	Returns:
+		The rules loaded from the API.
+		The second parameter indicates if the rules were loaded correctly:
+		if True, the first parameter is a list of rules
+		if False, the first parameter is a string with the error message.
+	"""
+	# Get the rules from the API
+	rules_data = get_rules_from_api(host, port)
+	if rules_data is None:
+		return "Error connecting with the server", False
+
+	# Parse de API data
+	rules = Rule.from_api(rules_data)
+	if rules is None:
+		return "Error: unexpected structure of the API response", False
+
+	# Return the correct data
+	return rules, True
+
 def main():
 	"""
 	Main function of the script.
@@ -77,6 +109,15 @@ def main():
 	if not correct:
 		print(devices)
 		sys.exit(1)
+
+	# Load the rules
+	rules, correct = load_rules(args.server_host, args.server_port)
+	if not correct:
+		print(rules)
+		sys.exit(1)
+	
+	print("Devices: ", devices)
+	print("Rules: ", rules)
 
 if __name__ == '__main__':
 	main()

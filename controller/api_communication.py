@@ -17,3 +17,21 @@ def get_devices_from_api(
 		return request.json()
 	except Exception:
 		return None
+
+def get_rules_from_api(
+	host: str,
+	port: int
+):
+	"""
+	Function to read the rules data from the api and return it
+	Args:
+		host (str): Host of the Django server.
+		port (int): Port of the Django server.
+	"""	
+	try:
+		request = requests.get(
+			f"http://localhost:8000/api/v1/rules/"
+		)
+		return request.json()
+	except Exception:
+		return None
