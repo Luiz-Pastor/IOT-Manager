@@ -46,6 +46,8 @@ class Device:
 					current['id'],
 					current['host'],
 					current['port'],
+					current['status_topic'],
+					current['command_topic'],
 					current['device_type'],
 					current['configuration']
 				)
