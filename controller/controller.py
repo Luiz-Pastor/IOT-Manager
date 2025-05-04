@@ -1,6 +1,8 @@
+import sys
 import argparse
-from .api_communication import get_devices_from_api
+from typing import Union, Tuple, List
 from .device import Device
+from .api_communication import get_devices_from_api
 
 def parse_params() -> argparse.Namespace:
 	"""
@@ -35,6 +37,34 @@ def parse_params() -> argparse.Namespace:
 	# Return the params
 	return parsed
 
+def load_devices(
+		host: str,
+		port: int
+) -> Tuple[Union[str, List[Device]], bool]:
+	"""
+	Function to load the devices from the API.
+	Args:
+		host (str): Host of the Django server.
+		port (int): Port of the Django server.
+	Returns:
+		The devices loaded from the API.
+		The second parameter indicates if the devices were loaded correctly:
+		if True, the first parameter is a list of devices
+		if False, the first parameter is a string with the error message.
+	"""
+	# Get the devices from the API
+	devices_data = get_devices_from_api(host, port)
+	if devices_data is None:
+		return "Error connecting with the server", False
+
+	# Parse de API data
+	devices = Device.from_api(devices_data)
+	if devices is None:
+		return "Error: unexpected structure of the API response", False
+	
+	# Return the correct data
+	return devices, True
+
 def main():
 	"""
 	Main function of the script.
@@ -43,8 +73,10 @@ def main():
 	args = parse_params()
 
 	# Load the devices
-	devices_data = get_devices_from_api(args.server_host, args.server_port)
-	devices = Device.from_api(devices_data)
+	devices, correct = load_devices(args.server_host, args.server_port)
+	if not correct:
+		print(devices)
+		sys.exit(1)
 
 if __name__ == '__main__':
 	main()
