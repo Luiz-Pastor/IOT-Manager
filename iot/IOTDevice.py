@@ -29,7 +29,7 @@ class IOTDevice(ABC):
 		self.device_id = device_id
 
 		# Save the topics that will be used
-		self.state_topic = f"{self.TOPIC_BASENAME}/{self.device_id}"
+		self.state_topic = f"{self.TOPIC_BASENAME}/{self.device_id}/state"
 		self.command_topic = f"{self.TOPIC_BASENAME}/{self.device_id}/command"
 
 		# Create the client

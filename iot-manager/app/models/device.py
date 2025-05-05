@@ -45,7 +45,7 @@ class Device(models.Model):
 		"""
 		Returns the status topic of the device.
 		"""
-		return f"redes/2312/10/{self.id}/status"
+		return f"redes/2312/10/{self.id}/state"
 	
 	@property
 	def command_topic(self) -> str:
