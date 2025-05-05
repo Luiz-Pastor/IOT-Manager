@@ -17,6 +17,7 @@ class Rule(models.Model):
 		GT = '>', 'Greater than'
 		LT = '<', 'Less than'
 		EQ = '==', 'Equal to'
+		NE = '!=', 'Not equal to'
 		GTE = '>=', 'Greater than or equal to'
 		LTE = '<=', 'Less than or equal to'
 
