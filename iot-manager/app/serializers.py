@@ -100,5 +100,5 @@ class LogSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = Log
-        fields = ['id','message','timestamp']
+        fields = ['id', 'device', 'message','timestamp']
         read_only_fields = ['id','timestamp']
