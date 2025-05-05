@@ -5,6 +5,67 @@ import paho.mqtt.client as mqtt
 import threading
 import json
 from .api_communication import add_log_message
+from datetime import datetime
+
+def get_correct_value(key: str, value: str) -> Any:
+	"""
+	Function to get the correct value of a variable.
+	Args:
+		key (str): The key of the variable.
+		value (str): The value of the variable.
+	Returns:
+		The correct value of the variable.
+	"""
+	# Temperature
+	if key == 'temperature':
+		try:
+			return float(value)
+		except ValueError:
+			raise ValueError("Invalid value for temperature")
+
+	# Time
+	if key == 'time':
+		try:
+			return datetime.strptime(value, '%H:%M:%S').time()
+		except ValueError:
+			raise ValueError("Invalid value for time")
+
+	# State
+	if key == 'state':
+		if value != 'ON' and value != 'OFF':
+			raise ValueError("Invalid value for state")
+		return value
+
+	raise ValueError("Invalid key")
+
+def compare_values(
+		value1: Any,
+		value2: Any,
+		operator: str
+) -> bool:
+	"""
+	Function to compare two values.
+	Args:
+		value1 (Any): The first value.
+		value2 (Any): The second value.
+		operator (str): The operator to use for the comparison.
+	Returns:
+		The result of the comparison.
+	"""
+	oprs = {
+		'>': lambda x, y: x > y,
+		'<': lambda x, y: x < y,
+		'==': lambda x, y: x == y,
+		'!=': lambda x, y: x != y,
+		'>=': lambda x, y: x >= y,
+		'<=': lambda x, y: x <= y,
+	}
+
+	if operator in oprs:
+		return oprs[operator](value1, value2)
+
+	raise ValueError("Invalid operator")
+
 
 class IOTController:
 	def __init__(
@@ -89,13 +150,50 @@ class IOTController:
 				device_id
 			)
 		
-		# TODO: Check the rules
-		# 	1. Get the variable to check
-		#	2. Convert it to a type so it can be compared
-		# 	3. Check the rules, and get all the ones that matches
-		# 	4. Execute the rule, notifying django and sendking the command_payloads
+		# Get the variable to check, and convert to the correct value
+		key_to_check = device.state_variable
+		value = payload.get(key_to_check)
+		try:
+			source_correct_value = get_correct_value(key_to_check, value)
+		except ValueError:
+			# TODO: Notify the server the error
+			return
 
-		
-		
+		# Check the rules, checking if it has to be applied
+		for rule in self.rules:
+			# Check if the rule matches the device
+			if rule.source_device_id != device_id:
+				continue
 
+			# Convert the threshold to the correct value
+			try:
+				threshold = get_correct_value(rule.key, rule.threshold)
+			except ValueError:
+				# TODO: Notify the server the error
+				return
+			
+			# Make the comparation, and check if it is correct
+			try:
+				comparation = compare_values(source_correct_value, threshold, rule.operator)
+			except ValueError:
+				# TODO: Notify the server the error
+				return
+			
+			if not comparation:
+				continue
+
+			# Execute the command on the target device (send the command payload)
+			target_device = next(
+				(device for device in self.devices if device.id == rule.target_device_id),
+				None
+			)
+			if not target_device:
+				continue
+			self.client.publish(
+				target_device.command_topic,
+				json.dumps(rule.command_payload),
+				qos=1
+			)
+
+			# TODO: Notify django
 			
