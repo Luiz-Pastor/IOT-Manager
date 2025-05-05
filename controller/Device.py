@@ -9,6 +9,7 @@ class Device:
 		status_topic: str,
 		command_topic: str,
 		device_type: str,
+		state_variable: str,
 		configuration: Dict[str, str]
 	):
 		"""
@@ -26,6 +27,7 @@ class Device:
 		self.status_topic = status_topic
 		self.command_topic = command_topic
 		self.type = device_type
+		self.state_variable = state_variable
 		self.configuration = configuration
 	
 	def __str__(self):
@@ -49,6 +51,7 @@ class Device:
 					current['status_topic'],
 					current['command_topic'],
 					current['device_type'],
+					current['state_variable'],
 					current['configuration']
 				)
 				devices.append(new_device)
