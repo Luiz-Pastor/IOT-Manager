@@ -121,7 +121,6 @@ class IOTController:
 			client.subscribe(device.status_topic)
 		print("[ Controller ] Starting...")
 
-
 	def on_message(self, client, userdata, msg):
 		"""
 		Callback function that is called when a message is received.
@@ -167,7 +166,7 @@ class IOTController:
 
 			# Convert the threshold to the correct value
 			try:
-				threshold = get_correct_value(rule.key, rule.threshold)
+				threshold = get_correct_value(key_to_check, rule.threshold)
 			except ValueError:
 				# TODO: Notify the server the error
 				return
@@ -191,9 +190,14 @@ class IOTController:
 				continue
 			self.client.publish(
 				target_device.command_topic,
-				json.dumps(rule.command_payload),
+				rule.command_payload,
 				qos=1
 			)
 
-			# TODO: Notify django
-			
+			# Notify django
+			add_log_message(
+				self.server_host,
+				self.server_port,
+				f"Rule '{rule.name}' applied",
+				device_id
+			)
