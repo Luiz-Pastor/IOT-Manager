@@ -55,13 +55,14 @@ def add_log_message(
 	"""
 	# Set the body to send
 	body = { "message": message }
-	if device_id:
+	if device_id is not None:
 		body["device"] = device_id
 
+	print("Sending: ", body)
 	try:
 		request = requests.post(
 			f"{host}:{port}/api/v1/logs/",
-			data=body
+			json=body
 		)
 	except Exception:
 		return None
