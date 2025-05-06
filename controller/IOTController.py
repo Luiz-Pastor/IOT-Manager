@@ -4,7 +4,11 @@ from typing import List, Dict, Any
 import paho.mqtt.client as mqtt
 import threading
 import json
-from .api_communication import add_log_message
+from .database_communication import (
+	create_connection,
+	get_rules,
+	add_log
+)
 from datetime import datetime
 
 def get_correct_value(key: str, value: str) -> Any:
@@ -70,20 +74,14 @@ def compare_values(
 class IOTController:
 	def __init__(
 		self,
-		mqtt_host: str,
-		mqtt_port: int,
-		server_host: str,
-		server_port: int,
-		devices: List[Device],
-		rules: List[Rule]
+		host: str,
+		port: int,
+		database: str
 	):
 		# Save the params
-		self.mqtt_host = mqtt_host
-		self.mqtt_port = mqtt_port
-		self.server_host = server_host
-		self.server_port = server_port
-		self.devices = devices
-		self.rules = rules
+		self.mqtt_host = host
+		self.mqtt_port = port
+		self.database = database
 
 		# Set the client and callbacks
 		self.client = mqtt.Client()
@@ -117,8 +115,8 @@ class IOTController:
 			rc (int): The connection result.
 		"""
 		# Connect on each device status topic
-		for device in self.devices:
-			client.subscribe(device.status_topic)
+		print(f"[ Controller ] Connected to the broker with result code {rc}")
+		self.client.subscribe("redes/2312/10/+/state")
 		print("[ Controller ] Starting...")
 
 	def on_message(self, client, userdata, msg):
@@ -129,28 +127,29 @@ class IOTController:
 			userdata (Any): The private user data as set in Client() or userdata_set().
 			msg (paho.mqtt.message.MQTTMessage): The message that was received.
 		"""
+		# Connect with the database
+		database_connection = create_connection(self.database)
+
 		# Get the device id that sent the message, and the device of the list
 		device_id = msg.topic.split("/")[-2]
-		device = next(
-			(device for device in self.devices if device.id == device_id),
-			None
-		)
-		if device is None:
-			return
 
 		# Get the payload and the topic
 		try:
 			payload = json.loads(msg.payload.decode())
 		except json.JSONDecodeError:
-			add_log_message(
-				self.server_host,
-				self.server_port,
+			add_log(
+				database_connection,
 				"Bad message format",
 				device_id
 			)
 		
 		# Get the variable to check, and convert to the correct value
-		key_to_check = device.state_variable
+		message_keys = list(payload.keys())
+		if len(message_keys) != 1:
+			# TODO: Add log?
+			return
+
+		key_to_check = message_keys[0]
 		value = payload.get(key_to_check)
 		try:
 			source_correct_value = get_correct_value(key_to_check, value)
@@ -159,21 +158,18 @@ class IOTController:
 			return
 
 		# Check the rules, checking if it has to be applied
-		for rule in self.rules:
-			# Check if the rule matches the device
-			if rule.source_device_id != device_id:
-				continue
-
+		rules = get_rules(device_id, database_connection)
+		for rule in rules:
 			# Convert the threshold to the correct value
 			try:
-				threshold = get_correct_value(key_to_check, rule.threshold)
+				threshold = get_correct_value(key_to_check, rule['threshold'])
 			except ValueError:
 				# TODO: Notify the server the error
 				return
 			
 			# Make the comparation, and check if it is correct
 			try:
-				comparation = compare_values(source_correct_value, threshold, rule.operator)
+				comparation = compare_values(source_correct_value, threshold, rule['operator'])
 			except ValueError:
 				# TODO: Notify the server the error
 				return
@@ -182,22 +178,16 @@ class IOTController:
 				continue
 
 			# Execute the command on the target device (send the command payload)
-			target_device = next(
-				(device for device in self.devices if device.id == rule.target_device_id),
-				None
-			)
-			if not target_device:
-				continue
+			target_device = rule['target_device_id']
 			self.client.publish(
-				target_device.command_topic,
-				rule.command_payload,
+				f"redes/2312/10/{target_device}/command",
+				rule['command_payload'],
 				qos=1
 			)
 
 			# Notify django
-			add_log_message(
-				self.server_host,
-				self.server_port,
-				f"Rule '{rule.name}' applied",
+			add_log(
+				database_connection,
+				f"Rule '{rule['name']}' applied",
 				device_id
 			)
