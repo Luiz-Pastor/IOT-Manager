@@ -6,6 +6,8 @@ import json
 
 from .IOTDevice import IOTDevice
 
+DEBUG_MODE = None
+
 class SwitchState(Enum):
 	"""
 	Enum class to represent the state of the switch.
@@ -78,12 +80,13 @@ class DummySwitchDevice(IOTDevice):
 			flags (dict): Response flags sent by the broker.
 			rc (int): The connection result.
 		"""
-		# Debud print
-		print(f"{self.device_header} Connected with result code {rc}")
+		if DEBUG_MODE:
+			# Debud print
+			print(f"{self.device_header} Connected with result code {rc}")
 
-		# Subscribe to the command topic
-		print(f"{self.device_header} Init state: {self.state.value}")
-		print(f"{self.device_header} Subscribing to {self.command_topic}", end="\n\n")
+			# Subscribe to the command topic
+			print(f"{self.device_header} Init state: {self.state.value}")
+			print(f"{self.device_header} Subscribing to {self.command_topic}", end="\n\n")
 		self.client.subscribe(self.command_topic)
 
 		# Publish the current state
@@ -100,16 +103,19 @@ class DummySwitchDevice(IOTDevice):
 				be decoded by using the decode() method.
 		"""
 		# Get the message payload
-		print(f"{self.device_header} Received message: {msg.payload.decode()}")
+		if DEBUG_MODE:
+			print(f"{self.device_header} Received message: {msg.payload.decode()}")
 		try:
 			payload = json.loads(msg.payload)
 		except json.JSONDecodeError:
-			print(f"{self.device_header} Bad message format")
+			if DEBUG_MODE:
+				print(f"{self.device_header} Bad message format")
 			return
 
 		# Check if a command has been received
 		if 'cmd' not in payload:
-			print(f"{self.device_header} Invalid message received, ignoring")
+			if DEBUG_MODE:
+				print(f"{self.device_header} Invalid message received, ignoring")
 			return
 
 		# Execute the command
@@ -119,7 +125,8 @@ class DummySwitchDevice(IOTDevice):
 			return
 
 		# Comamnd not valid
-		print(f"{self.device_header} Invalid command received, ignoring")
+		if DEBUG_MODE:
+			print(f"{self.device_header} Invalid command received, ignoring")
 
 	def get_command(self, client, userdata, payload) -> None:
 		"""
@@ -129,7 +136,8 @@ class DummySwitchDevice(IOTDevice):
 			userdata (any): The private user data as set in Client() or userdata_set().
 			payload (json): The payload of the message, as JSON
 		"""
-		print(f"{self.device_header} state is {self.state.value}")
+		if DEBUG_MODE:
+			print(f"{self.device_header} state is {self.state.value}")
 		self.publish_state()
 		
 	def set_command(self, client, userdata, payload) -> None:
@@ -141,14 +149,16 @@ class DummySwitchDevice(IOTDevice):
 			payload (json): The payload of the message, as JSON
 		"""
 		if 'state' not in payload:
-			print(f"{self.device_header} Error: no state received")
+			if DEBUG_MODE:
+				print(f"{self.device_header} Error: no state received")
 			return
 
 		# Get the state from the enum
 		try:
 			received_state = SwitchState(payload['state'])
 		except ValueError:
-			print(f"{self.device_header} Invalid state received, ignoring")
+			if DEBUG_MODE:
+				print(f"{self.device_header} Invalid state received, ignoring")
 			received_state = None
 		
 		# If the state is valid, try to change it
@@ -157,11 +167,14 @@ class DummySwitchDevice(IOTDevice):
 
 			# Simulate a failure
 			if received_state == self.state:
-				print(f"{self.device_header} state is already {self.state.value}")
+				if DEBUG_MODE:
+					print(f"{self.device_header} state is already {self.state.value}")
 			elif random_number < self.probability:
-				print(f"{self.device_header} Simulating a failure")
+				if DEBUG_MODE:
+					print(f"{self.device_header} Simulating a failure")
 			else:
-				print(f"{self.device_header} Changing state from {self.state.value} to {received_state.value}")
+				if DEBUG_MODE:
+					print(f"{self.device_header} Changing state from {self.state.value} to {received_state.value}")
 				self.state = received_state
 		
 		# Publish the current state
@@ -192,6 +205,10 @@ def parse_params() -> argparse.Namespace:
 		help="Probability of failure when changing state (default: %(default)s)"
 	)
 	params.add_argument(
+		"--debug", type=bool, default=False,
+		help="Debug mode (default: %(default)s)"
+	)
+	params.add_argument(
 		"id",
 		help="IOT Device ID"
 	)
@@ -208,8 +225,11 @@ def main():
 	"""
 	Main function of the script.
 	"""
+	global DEBUG_MODE
+
 	# Parse the params
 	args = parse_params()
+	DEBUG_MODE = args.debug
 
 	# Init switch
 	device = DummySwitchDevice(
@@ -222,7 +242,8 @@ def main():
 	# Run the device
 	error = device.run()
 	if error:
-		print(f"Error during the execution: {error}")
+		if DEBUG_MODE:
+			print(f"Error during the execution: {error}")
 		sys.exit(1)
 
 if __name__ == '__main__':

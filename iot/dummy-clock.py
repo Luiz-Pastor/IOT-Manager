@@ -8,6 +8,8 @@ import json
 
 from .IOTDevice import IOTDevice
 
+DEBUG_MODE = None
+
 class DummyClockDevice(IOTDevice):
 	"""
 	Class that represents a clock device.
@@ -69,7 +71,8 @@ class DummyClockDevice(IOTDevice):
 		"""
 		# Publish the state
 		time_str = self.current_time.strftime("%H:%M:%S")
-		print(f"{self.device_header} Publishing state: {time_str}")
+		if DEBUG_MODE:
+			print(f"{self.device_header} Publishing state: {time_str}")
 		self.client.publish(
 			self.state_topic,
 			json.dumps({
@@ -88,12 +91,13 @@ class DummyClockDevice(IOTDevice):
 			flags (dict): Response flags sent by the broker.
 			rc (int): The connection result.
 		"""
-		# Debug that the connection has been established
-		print(f"{self.device_header} Connected with result code {rc}")
+		if DEBUG_MODE:
+			# Debug that the connection has been established
+			print(f"{self.device_header} Connected with result code {rc}")
 
-		# Subscribe to the command topic
-		print(f"{self.device_header} Init state: {self.current_time.strftime('%H:%M:%S')}")
-		print(f"{self.device_header} Subscribing to {self.command_topic}", end="\n\n")
+			# Subscribe to the command topic
+			print(f"{self.device_header} Init state: {self.current_time.strftime('%H:%M:%S')}")
+			print(f"{self.device_header} Subscribing to {self.command_topic}", end="\n\n")
 		self.client.subscribe(self.command_topic)
 
 		# Publish the init state
@@ -132,16 +136,19 @@ class DummyClockDevice(IOTDevice):
 			userdata: The private user data as set in Client() or userdata_set.
 			msg (mqtt.MQTTMessage): An instance of MQTTMessage.
 		"""
-		print(f"{self.device_header} Received message: {str(msg.payload.decode())}")
+		if DEBUG_MODE:
+			print(f"{self.device_header} Received message: {str(msg.payload.decode())}")
 		try:
 			payload = json.loads(msg.payload)
 		except json.JSONDecodeError:
-			print(f"{self.device_header} Bad message format")
+			if DEBUG_MODE:
+				print(f"{self.device_header} Bad message format")
 			return
 
 		# Check if a command has been received
 		if 'cmd' not in payload:
-			print(f"{self.device_header} Invalid message received, ignoring")
+			if DEBUG_MODE:
+				print(f"{self.device_header} Invalid message received, ignoring")
 			return
 
 		# Execute the command
@@ -151,7 +158,8 @@ class DummyClockDevice(IOTDevice):
 			return
 
 		# Comamnd not valid
-		print(f"{self.device_header} Invalid command received, ignoring")
+		if DEBUG_MODE:
+			print(f"{self.device_header} Invalid command received, ignoring")
 
 	def get_command(self, client, userdata, payload: str) -> None:
 		"""
@@ -161,7 +169,8 @@ class DummyClockDevice(IOTDevice):
 			userdata: The private user data as set in Client() or userdata_set in subscribe().
 			payload (Any): The payload of the message.
 		"""
-		print(f"{self.device_header} state is {self.current_time.strftime('%H:%M:%S')}")
+		if DEBUG_MODE:
+			print(f"{self.device_header} state is {self.current_time.strftime('%H:%M:%S')}")
 		self.publish_state()
 
 
@@ -198,6 +207,10 @@ def parse_params() -> argparse.Namespace:
 		help="Sent messages per second (default: %(default)s)"
 	)
 	params.add_argument(
+		"--debug", type=bool, default=False,
+		help="Debug mode (default: %(default)s)"
+	)
+	params.add_argument(
 		"id",
 		help="IOT Device ID"
 	)
@@ -222,8 +235,11 @@ def main():
 	"""
 	Main function of the script.
 	"""
+	global DEBUG_MODE
+
 	# Parse the params
 	args = parse_params()
+	DEBUG_MODE = args.debug
 
 	# Init sensor
 	device = DummyClockDevice(
@@ -238,7 +254,8 @@ def main():
 	# Simulate clock
 	error = device.run()
 	if error:
-		print(f"Error during the execution: {error}")
+		if DEBUG_MODE:
+			print(f"Error during the execution: {error}")
 		sys.exit(1)
 	
 if __name__ == "__main__":
