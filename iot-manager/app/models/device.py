@@ -126,7 +126,15 @@ class Device(models.Model):
 		env['PYTHONPATH'] = '../'
 
 		# Start
-		process = subprocess.Popen(cmd, env=env)
+		process = subprocess.Popen(
+			cmd,
+			env=env,
+			preexec_fn=os.setsid,
+			stdout=subprocess.DEVNULL,
+			stderr=subprocess.DEVNULL,
+			stdin=subprocess.DEVNULL,
+			close_fds=True
+		)
 		self.pid = process.pid
 		self.save(update_fields=['pid'])
 
