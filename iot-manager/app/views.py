@@ -83,8 +83,9 @@ class DeviceCreateView(CreateView):
         return context
 
     def form_valid(self, form):
-        # TODO: send the information to the controller
-        return super().form_valid(form)
+        resp = super().form_valid(form)
+        self.object.start_process(extra_args=form.get_extra_args())
+        return resp
 
 class DeviceListView(ListView):
     """
@@ -101,6 +102,7 @@ def device_delete(request, pk):
     Delete the device with the provided primary key
     """
     device = get_object_or_404(Device, pk=pk)
+    device.stop_process()
     device.delete()
     return redirect(reverse('device-list'))
 
@@ -122,10 +124,6 @@ class RuleCreateView(CreateView):
     form_class = RuleForm
     template_name = "rules/rule_form.html"
     success_url = reverse_lazy("rule-list")
-
-    def form_valid(self, form):
-        # TODO: send the information to the controller
-        return super().form_valid(form)
 
 class RuleListView(ListView):
     model = Rule

@@ -1,4 +1,7 @@
 from django.db import models
+import subprocess
+import os
+import signal
 
 class Device(models.Model):
 	# Device id
@@ -10,12 +13,19 @@ class Device(models.Model):
 	# Server host
 	host = models.CharField(
 		max_length=128,
-		default='redes2.ii.uam.es',
+		default='localhost',
 	)
 
 	# Server port
 	port = models.PositiveIntegerField(
 		default=1883,
+	)
+
+	# Device PID
+	pid = models.IntegerField(
+		null=True,
+		blank=True,
+		editable=False
 	)
 
 	class Meta:
@@ -70,3 +80,66 @@ class Device(models.Model):
 			return concrete.variable_name
 		except AttributeError:
 			raise NotImplementedError("Subclasses must implement this method")
+
+
+	############################
+	# NOTE: Process management #
+	############################
+
+	@property
+	def device_type(self) -> str:
+		"""
+		Returns the type of device.
+		"""
+		if hasattr(self, 'dummysensor'):
+			return 'dummy-sensor'
+		if hasattr(self, 'dummyclock'):
+			return 'dummy-clock'
+		if hasattr(self, 'dummyswitch'):
+			return 'dummy-switch'
+
+	def start_process(self, extra_args: list = None):
+		"""
+		Starts the device process.
+		Args:
+			extra_args (list): Extra arguments to pass to the process.
+		"""
+		if self.pid is not None:
+			return
+
+		scripts_path = {
+			'dummy-sensor': 'iot.dummy-sensor',
+			'dummy-clock': 'iot.dummy-clock',
+			'dummy-switch': 'iot.dummy-switch',
+		}
+
+		module = scripts_path.get(self.device_type)
+		cmd = [
+			'python3', '-m', module,
+			'--host', self.host, '--port', str(self.port),
+			self.id
+		]
+		if extra_args:
+			cmd.extend(extra_args)
+		
+		env = os.environ.copy()
+		env['PYTHONPATH'] = '../'
+
+		# Start
+		process = subprocess.Popen(cmd, env=env)
+		self.pid = process.pid
+		self.save(update_fields=['pid'])
+
+	def stop_process(self) -> None:
+		"""
+		Stops the device process.
+		"""
+		if self.pid is None:
+			return
+
+		try:
+			os.kill(self.pid, signal.SIGTERM)
+		except OSError:
+			pass
+		self.pid = None
+		self.save(update_fields=['pid'])
