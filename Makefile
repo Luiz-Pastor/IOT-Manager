@@ -4,6 +4,9 @@
 cache:
 	@rm -rf $(shell find . -type d -name "__pycache__")
 
+controller:
+	@python3 -m controller.controller --debug false
+
 ####################
 # NOTE: Containers #
 ####################
