@@ -41,3 +41,10 @@ class DummyClock(Device):
 		Returns the variable name of the device message key.
 		"""
 		return "time"
+	
+	@property
+	def device_type(self) -> str:
+		"""
+		Returns the device type.
+		"""
+		return "dummy-clock"

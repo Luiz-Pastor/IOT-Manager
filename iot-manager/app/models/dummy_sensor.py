@@ -47,3 +47,10 @@ class DummySensor(Device):
 		Returns the variable name of the device message key.
 		"""
 		return "temperature"
+	
+	@property
+	def device_type(self) -> str:
+		"""
+		Returns the device type.
+		"""
+		return "dummy-sensor"

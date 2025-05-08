@@ -98,7 +98,7 @@ class Device(models.Model):
 		if hasattr(self, 'dummyswitch'):
 			return 'dummy-switch'
 
-	def start_process(self, extra_args: list = None):
+	def start_process(self, extra_args: list = None) -> int:
 		"""
 		Starts the device process.
 		Args:
@@ -114,6 +114,9 @@ class Device(models.Model):
 		}
 
 		module = scripts_path.get(self.device_type)
+		if module is None:
+			raise ValueError(f"Unknown device type: {self.device_type}")
+
 		cmd = [
 			'python3', '-m', module,
 			'--host', self.host, '--port', str(self.port),
@@ -136,14 +139,16 @@ class Device(models.Model):
 			close_fds=True
 		)
 		self.pid = process.pid
-		self.save(update_fields=['pid'])
+		self.save()
 
-	def stop_process(self) -> None:
+		return self.pid
+
+	def stop_process(self) -> bool:
 		"""
 		Stops the device process.
 		"""
 		if self.pid is None:
-			return
+			return False
 
 		try:
 			os.kill(self.pid, signal.SIGTERM)
@@ -151,3 +156,4 @@ class Device(models.Model):
 			pass
 		self.pid = None
 		self.save(update_fields=['pid'])
+		return True
