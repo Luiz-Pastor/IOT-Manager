@@ -30,6 +30,10 @@ def parse_params() -> argparse.Namespace:
 		"-db", "--database", default="../iot-manager/db.sqlite3",
 		help="IOT Database (default: %(default)s)"
 	)
+	params.add_argument(
+		"--debug", type=bool, default=False,
+		help="Debug mode (default: %(default)s)"
+	)
 	parsed = params.parse_args()
 
 	# Return the params
@@ -52,6 +56,7 @@ def main():
 		host=args.host,
 		port=args.port,
 		database=args.database,
+		debug=args.debug
 	)
 	controller.start()
 

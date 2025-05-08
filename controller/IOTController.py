@@ -76,12 +76,15 @@ class IOTController:
 		self,
 		host: str,
 		port: int,
-		database: str
+		database: str,
+		debug: bool = False
 	):
 		# Save the params
 		self.mqtt_host = host
 		self.mqtt_port = port
 		self.database = database
+		self.debug = debug
+
 
 		# Set the client and callbacks
 		self.client = mqtt.Client()
@@ -115,9 +118,11 @@ class IOTController:
 			rc (int): The connection result.
 		"""
 		# Connect on each device status topic
-		print(f"[ Controller ] Connected to the broker with result code {rc}")
+		if self.debug:
+			print(f"[ Controller ] Connected to the broker with result code {rc}")
 		self.client.subscribe("redes/2312/10/+/state")
-		print("[ Controller ] Starting...")
+		if self.debug:
+			print("[ Controller ] Starting...")
 
 	def on_message(self, client, userdata, msg):
 		"""
@@ -132,6 +137,8 @@ class IOTController:
 
 		# Get the device id that sent the message, and the device of the list
 		device_id = msg.topic.split("/")[-2]
+		if self.debug:
+			print(f"[ {device_id} ] Message received from {device_id}")
 
 		# Get the payload and the topic
 		try:
@@ -142,11 +149,17 @@ class IOTController:
 				"Bad message format",
 				device_id
 			)
+		if self.debug:
+			print(f"[ {device_id} ] Payload: ", payload)
 		
 		# Get the variable to check, and convert to the correct value
 		message_keys = list(payload.keys())
 		if len(message_keys) != 1:
-			# TODO: Add log?
+			add_log(
+				database_connection,
+				"Too many keys in the message",
+				device_id
+			)
 			return
 
 		key_to_check = message_keys[0]
@@ -154,26 +167,36 @@ class IOTController:
 		try:
 			source_correct_value = get_correct_value(key_to_check, value)
 		except ValueError:
-			# TODO: Notify the server the error
+			add_log(
+				database_connection,
+				"Bad value format",
+				device_id
+			)
 			return
 
 		# Check the rules, checking if it has to be applied
 		rules = get_rules(device_id, database_connection)
 		for rule in rules:
+			if self.debug:
+				print(f"[ {device_id} ] Checking rule: ", rule['name'])
 			# Convert the threshold to the correct value
 			try:
 				threshold = get_correct_value(key_to_check, rule['threshold'])
 			except ValueError:
-				# TODO: Notify the server the error
+				add_log(
+					database_connection,
+					"Invalid threshold format",
+				)
 				return
 			
 			# Make the comparation, and check if it is correct
 			try:
 				comparation = compare_values(source_correct_value, threshold, rule['operator'])
 			except ValueError:
-				# TODO: Notify the server the error
 				return
 			
+			if self.debug:
+				print(f"[ {device_id} ] Comparation result: ", comparation)
 			if not comparation:
 				continue
 
@@ -191,3 +214,8 @@ class IOTController:
 				f"Rule '{rule['name']}' applied",
 				device_id
 			)
+			if self.debug:
+				print(f"[ {device_id} ] Rule '{rule['name']}' applied")
+
+		# Close the database connection
+		database_connection.close()
