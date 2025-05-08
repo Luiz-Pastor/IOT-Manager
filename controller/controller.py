@@ -27,7 +27,7 @@ def parse_params() -> argparse.Namespace:
 		help="Port of the MQTT broker (default: %(default)s)"
 	)
 	params.add_argument(
-		"-db", "--database", default="../iot-manager/db.sqlite3",
+		"-db", "--database", default="iot-manager/db.sqlite3",
 		help="IOT Database (default: %(default)s)"
 	)
 	params.add_argument(
