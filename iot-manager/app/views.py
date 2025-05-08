@@ -5,12 +5,16 @@ from django.views.generic import (
 	ListView,
 	DetailView,
 	UpdateView,
+    FormView
 )
 from django.views.decorators.http import require_POST
 from django.shortcuts import redirect, get_object_or_404
 
 from .models import (
 	Device,
+    DummySensor,
+    DummyClock,
+    DummySwitch,
 	Rule,
     Log
 )
@@ -114,6 +118,41 @@ class DeviceDetailView(DetailView):
     template_name = "devices/device_detail.html"
     context_object_name = "device"
 
+class SensorUpdateView(UpdateView):
+    model         = DummySensor
+    form_class    = DummySensorForm
+    template_name = "devices/device_update.html"
+    success_url   = reverse_lazy("device-list")
+
+    def form_valid(self, form):
+        self.object.stop_process()
+        resp = super().form_valid(form)
+        self.object.start_process(extra_args=form.get_extra_args())
+        return resp
+
+class ClockUpdateView(UpdateView):
+    model         = DummyClock
+    form_class    = DummyClockForm
+    template_name = "devices/device_update.html"
+    success_url   = reverse_lazy("device-list")
+
+    def form_valid(self, form):
+        self.object.stop_process()
+        resp = super().form_valid(form)
+        self.object.start_process(extra_args=form.get_extra_args())
+        return resp
+
+class SwitchUpdateView(UpdateView):
+    model         = DummySwitch
+    form_class    = DummySwitchForm
+    template_name = "devices/device_update.html"
+    success_url   = reverse_lazy("device-list")
+
+    def form_valid(self, form):
+        self.object.stop_process()
+        resp = super().form_valid(form)
+        self.object.start_process(extra_args=form.get_extra_args())
+        return resp
 
 ###############
 # NOTE: Rules #
@@ -158,7 +197,6 @@ class RuleUpdateView(UpdateView):
     success_url = reverse_lazy("rule-list")
 
     def form_valid(self, form):
-        # TODO: send the information to the controller
         return super().form_valid(form)
 
 ##############
