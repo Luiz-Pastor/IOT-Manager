@@ -7,6 +7,9 @@ cache:
 controller:
 	@python3 -m controller.controller --debug false
 
+manager:
+	@cd iot-manager; python3 manage.py runserver
+
 ####################
 # NOTE: Containers #
 ####################
@@ -33,4 +36,4 @@ mosquitto-web-ui: mqtt-network
 		-p 8000:80 \
 		emqx/mqttx-web
 
-.PHONY: cache mqtt-network mosquitto mosquitto-web-ui
+.PHONY: cache controller manager mqtt-network mosquitto mosquitto-web-ui
