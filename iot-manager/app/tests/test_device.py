@@ -51,7 +51,8 @@ class TestDevice(TestCase):
 
 		# Stop the client loop
 		self.client.loop_stop()
-		switch.stop_process()
+		stopped = switch.stop_process()
+		self.assertTrue(stopped)
 
 		# Assert that the message was received
 		self.assertGreater(self.message_count, 0)
@@ -92,8 +93,8 @@ class TestDevice(TestCase):
 
 		# Stop the client loop
 		self.client.loop_stop()
-		sensor.stop_process()
+		stopped = sensor.stop_process()
+		self.assertTrue(stopped)
 
 		# Assert that the message was received
 		self.assertGreater(self.message_count, 3)
-		
