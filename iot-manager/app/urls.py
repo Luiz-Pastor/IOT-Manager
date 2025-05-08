@@ -44,7 +44,7 @@ urlpatterns = [
     # path("device/<str:pk>/update", DeviceUpdateView.as_view(), name="device-edit"),
 
     path("device/<str:pk>/update/", device_update_redirect, name="device-edit"),
-    path("sensor/<str:pk>/edit/",  SensorUpdateView.as_view(), name="sensor-pdate"),
+    path("sensor/<str:pk>/edit/",  SensorUpdateView.as_view(), name="sensor-update"),
     path("clock/<str:pk>/edit/",   ClockUpdateView.as_view(),  name="clock-update"),
     path("switch/<str:pk>/edit/",  SwitchUpdateView.as_view(), name="switch-update"),
 
