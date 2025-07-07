@@ -1,74 +1,77 @@
-# Práctica 3
+# IOT Manager
+The project consists of a web application to manage a series of IoT devices. In addition to this application, several controllers have been implemented to test its operation.
 
-## Instalación
-Para que todo el sistema funcione correctamente, es necesario instalar el entorno virtual con el `requirements.txt` proporcionado:
+The project is only a simulation of such devices, which are threads created to carry out a specific task.
+
+## Installation
+For the entire system to work correctly, it is necessary to install the virtual environment with the provided `requirements.txt`:
 ```bash
-# Crear entorno virtual
+# Create virtual environment
 python3 -m venv venv
 source venv/bin/activate
 
-# Instalar dependencias
+# Install dependencies
 python3 -m pip install -r requirements.txt
 ```
 
-Una vez hecho, es necesario realizar las migraciones de Django, de forma que la base de datos tenga la estructura correcta. Por ello, estando en la carpeta `iot-manage`:
+Once done, it is necessary to perform Django migrations, so that the database has the correct structure. Therefore, being in the `iot-manager` folder:
 ```bash
 python3 manage.py makemigrations
 python3 manage.py migrate
 ```
 
-Con esto, todos los requisitos están cumplidos. Los distintos elementos del sistema se pueden ejecutar de las siguientes maneras, estando en la raíz (siguiendo las guías del enunciado, que no se especifican aquí, solo es una guía con las reglas por defecto):
-- Controlador:
+With this, all requirements are met. The different elements of the system can be executed in the following ways, being at the root (following the guidelines of the statement, which are not specified here, only a guide with the default rules):
+- Controller:
 	```bash
 	python3 -m controller.controller
 	```
 
-- Dispositivos IoT:
+- IoT devices:
 	```bash
 	python3 -m iot.dummy-switch <id>
 	python3 -m iot.dummy-sensor <id>
 	python3 -m iot.dummy-clock <id>
 	```
 
-- Proyecto de Django (estando en `iot-manage`):
+- Django project (being in `iot-manager`):
 	```bash
-	python3 manage.py runserver # Se puede especificar puerto si hace falta
+	python3 manage.py runserver # You can specify port if needed
 	```
 
-> **NOTA IMPORTANTE:**  
-> Por defecto, se toma el valor del host como el supuesto servidor de Mosquitto de la EPS; no obstante, este no es funcional. Es necesario proporcionar `--host localhost` o la ruta por defecto donde el servidor de Mosquitto esté ejecutándose.
+> **IMPORTANT NOTE:**  
+> By default, the host value is taken as the supposed Mosquitto server of the EPS; however, this is not functional. It is necessary to provide `--host localhost` or the default path where the Mosquitto server is running.
 
-Además de los parámetros por defecto, tanto los IoT como el controlador manejan el parámetro `--debug` (por defecto en `false`), que sirve para mostrar mensajes relevantes.
+In addition to the default parameters, both IoT and the controller handle the `--debug` parameter (by default in `false`), which serves to show relevant messages.
 
-En el Makefile proporcionado, hay atajos (`controller`, `manager`) para lanzar el controlador y el proyecto de Django, respectivamente. Además, también se encuentran otras dos utilidades:
-- `mosquitto`: crea un contenedor de Eclipse Mosquitto totalmente funcional en localhost con su puerto por defecto.
-- `mosquitto-web-ui`: crea un contenedor de `emqx/mqttx-web`, el cual ofrece una interfaz gráfica sencilla para ver mensajes de los topics de un sistema en concreto, perfecto al principio para observar el comportamiento de los dispositivos IoT.
+In the provided Makefile, there are shortcuts (`controller`, `manager`) to launch the controller and the Django project, respectively. In addition, there are also two other utilities:
+- `mosquitto`: creates a fully functional Eclipse Mosquitto container on localhost with its default port.
+- `mosquitto-web-ui`: creates a container of `emqx/mqttx-web`, which offers a simple graphical interface to view messages from the topics of a specific system, perfect at the beginning to observe the behavior of IoT devices.
 
-## Requisitos
-- Crear, eliminar, editar y observar la información de los dispositivos.
-- Crear, eliminar, editar y observar la información de las reglas.
-- Crear una interfaz para que el usuario pueda interactuar con los elementos del sistema.
-- Implementar 3 tipos de dispositivos (DummySwitch, DummySensor, DummyClock).
-- Implementar el controlador del sistema (y el Rule Engine por separado si fuera necesario).
+## Requirements
+- Create, delete, edit and observe device information.
+- Create, delete, edit and observe rule information.
+- Create an interface for the user to interact with the system elements.
+- Implement 3 types of devices (DummySwitch, DummySensor, DummyClock).
+- Implement the system controller (and the Rule Engine separately if necessary).
 
-## Decisiones
-- **¿Controller y Rule Engine han de ser aplicaciones separadas?, ¿por qué?, ¿qué ventajas tiene una y otra opción?**  
-	En caso de hacerlo separado, el controlador solo debería escuchar los dispositivos, enviar la información al Rule Engine, escuchar del Rule Engine y enviar datos a los topics "commands" de los dispositivos. No obstante, creemos que el Rule Engine se podría ejecutar en el propio controlador. De esta forma, nos quitamos el paso de mantener una nueva conexión. Además, los accesos a la base de datos están optimizados, así que el tiempo perdido en nuestra implementación es menor que el que se perdería con dos entidades independientes.
+## Decisions
+- **Should Controller and Rule Engine be separate applications?, why?, what advantages does each option have?**  
+	If done separately, the controller should only listen to devices, send information to the Rule Engine, listen from the Rule Engine and send data to the "commands" topics of the devices. However, we believe that the Rule Engine could be executed in the controller itself. In this way, we eliminate the step of maintaining a new connection. In addition, database accesses are optimized, so the time lost in our implementation is less than what would be lost with two independent entities.
 
-- **¿Cómo se comunican Controller y Rule Engine en la opción escogida?**  
-	Al estar ambas en el controlador, el Rule Engine sería el hilo que se crea al recibir un mensaje del topic de algún dispositivo.
+- **How do Controller and Rule Engine communicate in the chosen option?**  
+	Being both in the controller, the Rule Engine would be the thread that is created when receiving a message from the topic of some device.
 
-- **¿Tiene sentido que alguno de estos componentes compartan funcionalidad?, ¿qué relación hay entre ellos?**  
-	A nuestro parecer, tenerlos separados sería más difícil de manejar. El controlador en verdad debería ser el encargado de manejar todo el sistema. Hacerlo depender de una unidad externa podría generar problemas.
+- **Does it make sense for any of these components to share functionality?, what relationship is there between them?**  
+	In our opinion, having them separate would be more difficult to handle. The controller should really be in charge of handling the entire system. Making it depend on an external unit could generate problems.
 
-- **¿Cuántas instancias hay de cada componente?**  
-	Todos los componentes pueden ser ejecutados en varias instancias. El único requisito con los IoT es que tengan IDs distintos (en caso de lanzarse por cuenta del usuario, en el proyecto de Django esto está limitado).
+- **How many instances are there of each component?**  
+	All components can be executed in multiple instances. The only requirement with IoT is that they have different IDs (in case of being launched by the user, in the Django project this is limited).
 
-## Implementaciones
-- Los dispositivos están especificados en el documento `doc/iots`.
-- El controlador se encarga de escuchar los topics en los que los IoT publican sus estados. En el momento en el que llega un mensaje, se comprueba si dicho dispositivo se encuentra como dispositivo origen de alguna regla; en caso positivo, se comprueba si los parámetros del estado concuerdan con las comparativas y valores de los que está conformada la regla. Si esto se cumple, el mensaje, también especificado en la regla, se envía al dispositivo destino.
-- **Rule Engine:** Como se explica en el campo "Decisiones", hemos decidido implementarlo junto con el controlador, sabiendo lo que conlleva.
-- El proyecto de Django se encarga de presentar una interfaz agradable en la que un usuario puede crear, eliminar y editar dispositivos y reglas, junto con una sección para ver los logs generados.
+## Implementations
+- The devices are specified in the document `doc/iots`.
+- The controller is responsible for listening to the topics where IoT devices publish their states. At the moment a message arrives, it is checked if said device is found as the source device of some rule; if positive, it is checked if the state parameters match the comparisons and values that the rule is made of. If this is met, the message, also specified in the rule, is sent to the destination device.
+- **Rule Engine:** As explained in the "Decisions" field, we have decided to implement it together with the controller, knowing what it entails.
+- The Django project is responsible for presenting a pleasant interface in which a user can create, delete and edit devices and rules, along with a section to view the generated logs.
 
-## Conclusiones
-Nos parece que, para el tiempo dedicado y que hemos tenido para la práctica (creemos que más de 2 semanas eran necesarias, sobre todo teniendo solo 1 clase a la semana y teniendo todas las entregas tan pronto), hemos desarrollado un producto sólido y funcional, con una interfaz bastante sencilla e intuitiva. El sistema de logs y de visualización hace que se sepa perfectamente los dispositivos que se están ejecutando, así como una lista de todas las reglas que están siendo analizadas en el sistema.
+## Conclusions
+We believe that, given the time dedicated and the time available for the project (we think more than two weeks would have been necessary, especially since we only had one class per week and all the deadlines were so soon), we have developed a solid and functional product, with a fairly simple and intuitive interface. The logging and visualization system allows users to clearly see which devices are running, as well as a list of all the rules currently being analyzed in the system.
