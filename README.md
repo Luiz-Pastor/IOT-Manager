@@ -72,6 +72,3 @@ In the provided Makefile, there are shortcuts (`controller`, `manager`) to launc
 - The controller is responsible for listening to the topics where IoT devices publish their states. At the moment a message arrives, it is checked if said device is found as the source device of some rule; if positive, it is checked if the state parameters match the comparisons and values that the rule is made of. If this is met, the message, also specified in the rule, is sent to the destination device.
 - **Rule Engine:** As explained in the "Decisions" field, we have decided to implement it together with the controller, knowing what it entails.
 - The Django project is responsible for presenting a pleasant interface in which a user can create, delete and edit devices and rules, along with a section to view the generated logs.
-
-## Conclusions
-We believe that, given the time dedicated and the time available for the project (we think more than two weeks would have been necessary, especially since we only had one class per week and all the deadlines were so soon), we have developed a solid and functional product, with a fairly simple and intuitive interface. The logging and visualization system allows users to clearly see which devices are running, as well as a list of all the rules currently being analyzed in the system.
